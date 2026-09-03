@@ -39,7 +39,7 @@ export function Register() {
       <div className="w-full max-w-sm">
         <Link to="/" className="mb-10 flex items-center gap-2">
           <FileStack size={22} className="text-accent" strokeWidth={1.8} />
-          <span className="font-display text-lg font-bold text-ink">Folio</span>
+          <span className="font-display text-lg font-bold text-ink">COSTTY</span>
         </Link>
 
         <h1 className="font-display text-2xl font-bold text-ink">Create your account</h1>

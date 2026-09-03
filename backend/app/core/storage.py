@@ -88,7 +88,8 @@ class SupabaseStorageBackend(StorageBackend):
         self._storage = self._client.storage
 
     def _get_bucket(self):
-        return self._storage.from_bucket(self._bucket)
+        # supabase-py 2.10.0 uses from_() to get a bucket handle
+        return self._storage.from_(self._bucket)
 
     def save(self, key: str, file_obj: BinaryIO) -> int:
         import tempfile

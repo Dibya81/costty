@@ -1,32 +1,32 @@
-import { useState } from "react";
-import { Trash2, HardDrive } from "lucide-react";
+import { HardDrive } from "lucide-react";
 import { Stat } from "../../components/ui/Stat";
 import { CategoryBars } from "../../components/admin/CategoryBars";
-import { Badge } from "../../components/ui/Badge";
 import { useAsync } from "../../hooks/useAsync";
 import { getDocumentBreakdown, getOverview } from "../../services/analyticsService";
 
-// Mock recent uploads for display
-const MOCK_UPLOADS = [
-  { id: 1, name: "Q3_Financial_Report.pdf", user: "alex_m", size: "4.8 MB", category: "PDF", uploaded: "2 min ago" },
-  { id: 2, name: "Product_Specs_v2.docx", user: "sarah_k", size: "2.1 MB", category: "Word", uploaded: "14 min ago" },
-  { id: 3, name: "Budget_2026.xlsx", user: "rahul_v", size: "6.4 MB", category: "Excel", uploaded: "1 hr ago" },
-  { id: 4, name: "Investor_Deck.pptx", user: "priya_s", size: "12.3 MB", category: "PowerPoint", uploaded: "3 hr ago" },
-];
-
-const CATEGORY_BADGE: Record<string, "accent" | "positive" | "warning" | "neutral"> = {
-  PDF: "accent",
-  Word: "neutral",
-  Excel: "positive",
-  PowerPoint: "warning",
+const CATEGORY_LABELS: Record<string, string> = {
+  PDF: "PDF",
+  Word: "Word",
+  Excel: "Excel",
+  PowerPoint: "PowerPoint",
+  Text: "Text",
+  Image: "Image",
+  Other: "Other",
 };
 
 export function AdminDocuments() {
   const { data: overview } = useAsync(getOverview, []);
   const { data: docBreakdown } = useAsync(getDocumentBreakdown, []);
-  const [removedIds, setRemovedIds] = useState<number[]>([]);
 
-  const uploads = MOCK_UPLOADS.filter((u) => !removedIds.includes(u.id));
+  // Per-category counts from the real backend breakdown
+  const counts: Record<string, number> = {};
+  if (docBreakdown) {
+    for (const d of docBreakdown) counts[d.category] = d.count;
+  }
+  const pdfCount = counts.PDF ?? 0;
+  const officeCount = (counts.Word ?? 0) + (counts.Excel ?? 0) + (counts.PowerPoint ?? 0);
+  const imageCount = counts.Image ?? 0;
+  const otherCount = (counts.Text ?? 0) + (counts.Other ?? 0);
 
   return (
     <div className="space-y-8">
@@ -38,58 +38,42 @@ export function AdminDocuments() {
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Stat label="Total Documents" value={overview?.totalDocuments.toLocaleString("en-IN") ?? "—"} />
-        <Stat label="PDF" value="—" />
-        <Stat label="Word / Excel / PPTX" value="—" />
-        <div className="rounded-md border border-line bg-paper-raised/40 p-4 flex items-center gap-3">
-          <HardDrive size={16} className="text-ink-soft shrink-0" />
-          <div>
-            <p className="font-mono text-[11px] uppercase tracking-wide text-ink-soft">Storage</p>
-            <p className="font-display text-lg font-bold text-ink mt-0.5">—</p>
-          </div>
-        </div>
+        <Stat label="PDF" value={pdfCount.toLocaleString("en-IN")} />
+        <Stat label="Word / Excel / PPTX" value={officeCount.toLocaleString("en-IN")} />
+        <Stat label="Image / Other" value={(imageCount + otherCount).toLocaleString("en-IN")} />
       </div>
 
       {/* Format breakdown */}
       <section>
         <h2 className="mb-3 font-display text-sm font-semibold text-ink">Format Breakdown</h2>
         <div className="rounded-md border border-line bg-paper-raised/40 p-5">
-          {docBreakdown ? (
+          {docBreakdown && docBreakdown.length > 0 ? (
             <CategoryBars data={docBreakdown} />
           ) : (
-            <p className="py-8 text-center text-sm text-ink-soft">Loading breakdown…</p>
+            <p className="py-8 text-center text-sm text-ink-soft">
+              {docBreakdown ? "No documents uploaded yet." : "Loading breakdown…"}
+            </p>
           )}
         </div>
       </section>
 
-      {/* Recent uploads */}
-      <section>
-        <h2 className="mb-3 font-display text-sm font-semibold text-ink">Recent Uploads</h2>
-        <div className="divide-y divide-line rounded-md border border-line">
-          {uploads.length === 0 ? (
-            <p className="px-4 py-8 text-center text-sm text-ink-soft">No recent uploads.</p>
-          ) : (
-            uploads.map((doc) => (
-              <div key={doc.id} className="flex items-center gap-4 px-4 py-3">
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-ink">{doc.name}</p>
-                  <p className="mt-0.5 text-xs text-ink-soft">
-                    @{doc.user} · {doc.size} · {doc.uploaded}
-                  </p>
-                </div>
-                <Badge tone={CATEGORY_BADGE[doc.category] ?? "neutral"}>{doc.category}</Badge>
-                <button
-                  onClick={() => setRemovedIds((prev) => [...prev, doc.id])}
-                  className="shrink-0 rounded-sm p-1.5 text-ink-soft transition-colors hover:bg-accent/10 hover:text-accent"
-                  title="Remove file"
-                  aria-label="Remove file"
-                >
-                  <Trash2 size={14} />
-                </button>
+      {/* Live list of categories from the backend (no mock data) */}
+      {docBreakdown && docBreakdown.length > 0 && (
+        <section>
+          <h2 className="mb-3 font-display text-sm font-semibold text-ink">Category Counts</h2>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+            {docBreakdown.map((d) => (
+              <div
+                key={d.category}
+                className="flex items-center justify-between rounded-md border border-line bg-paper-raised/40 px-3 py-2"
+              >
+                <span className="text-xs text-ink-soft">{CATEGORY_LABELS[d.category] ?? d.category}</span>
+                <span className="font-mono text-sm font-medium text-ink">{d.count}</span>
               </div>
-            ))
-          )}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

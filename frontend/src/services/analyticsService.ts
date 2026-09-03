@@ -44,8 +44,28 @@ function adaptRevenue(raw: AdminRevenue): RevenuePoint[] {
 }
 
 function adaptDocBreakdown(raw: BackendDocBreakdown): DocumentBreakdown[] {
+  // Map file extensions to document categories so FileIcon can render an icon.
+  // Unknown extensions bucket into "Other".
+  const EXT_TO_CATEGORY: Record<string, DocumentBreakdown["category"]> = {
+    pdf: "PDF",
+    doc: "Word",
+    docx: "Word",
+    xls: "Excel",
+    xlsx: "Excel",
+    csv: "Excel",
+    ppt: "PowerPoint",
+    pptx: "PowerPoint",
+    txt: "Text",
+    md: "Text",
+    png: "Image",
+    jpg: "Image",
+    jpeg: "Image",
+    gif: "Image",
+    webp: "Image",
+    bmp: "Image",
+  };
   return Object.entries(raw.by_extension).map(([ext, count]) => ({
-    category: ext.replace(".", "").toLowerCase() as DocumentBreakdown["category"],
+    category: EXT_TO_CATEGORY[ext.toLowerCase()] ?? "Other",
     count: count as number,
   }));
 }

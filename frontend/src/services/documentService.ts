@@ -30,6 +30,12 @@ export interface UploadResult {
   folder_id: number | null;
   created_at: string;
   updated_at: string;
+  // Auto-estimated print cost (computed on upload using default print settings)
+  estimated_cost?: number | null;
+  currency?: string;
+  page_count?: number;
+  print_type?: "simplex" | "duplex";
+  color_mode?: "bw" | "color";
 }
 
 export async function listDocuments(params?: {
