@@ -1,0 +1,79 @@
+@import "./tokens.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background: var(--folio-paper);
+    color: var(--folio-ink);
+    font-family: var(--sc-font-text);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--sc-font-display);
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background: var(--folio-accent);
+    color: var(--folio-accent-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--folio-accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  * {
+    scrollbar-color: color-mix(in oklab, var(--folio-ink) 26%, transparent) transparent;
+    scrollbar-width: thin;
+  }
+
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* The signature move's self-drawing document is a bespoke --sc-p reader, not
+   an engine device, so it needs its own reduced-motion fallback: show the
+   finished drawing instead of scrubbing it. */
+@media (prefers-reduced-motion: reduce) {
+  .folio-doc-line {
+    stroke-dashoffset: 0 !important;
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

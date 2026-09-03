@@ -1,0 +1,43 @@
+# Environment files (NEVER commit secrets)
+.env
+.env.local
+.env.*.local
+*.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.db
+*.sqlite3
+.pytest_cache/
+.venv/
+venv/
+backend/storage/
+backend/print_estimator.db
+*.log
+
+# Node
+node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/lab/
+
+# Editor directories
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Build outputs
+build/
+*.tsbuildinfo
+
+# Coverage
+coverage/
+.nyc_output/

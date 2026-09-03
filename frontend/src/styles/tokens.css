@@ -1,0 +1,83 @@
+/* ============================================================================
+   Folio design tokens
+   ----------------------------------------------------------------------------
+   One palette, one type system, shared by all three surfaces (landing, app,
+   admin). The --sc-* variables are what the ScrollCraft engine reads on the
+   landing page; the --folio-* aliases are what Tailwind utility classes read
+   in the app and admin shells. Both point at the same values so the brand
+   never forks.
+
+   World: technical drawing (patent / assembly-diagram). Fine line weight,
+   monochrome ink on a warm paper ground. Chosen because it is the one
+   ScrollCraft world that is honest about being a diagram rather than a
+   photograph — which is also the only world buildable with real markup and
+   no photoreal asset pipeline. See src/pages/Landing.tsx for the brief.
+   ========================================================================== */
+
+:root {
+  /* ---- the six roles, one accent ---- */
+  --sc-canvas:      #F3EFE3;
+  --sc-surface:     #EAE2CE;
+  --sc-ink:         #1C170F;
+  --sc-ink-soft:    #746A57;
+  --sc-accent:      #B92B1C;
+  --sc-accent-ink:  #FBEEE8;
+
+  --sc-hairline:        color-mix(in oklab, var(--sc-ink) 14%, transparent);
+  --sc-hairline-strong: color-mix(in oklab, var(--sc-ink) 26%, transparent);
+
+  /* ---- type ---- */
+  --sc-font-display: "Archivo", system-ui, sans-serif;
+  --sc-font-text:    "IBM Plex Sans", system-ui, sans-serif;
+  --sc-font-mono:    "IBM Plex Mono", ui-monospace, monospace;
+
+  /* ---- light-canvas overrides (see worlds.md "If the canvas is light") ---- */
+  --sc-edge: inset 0 1px 0 color-mix(in oklab, #ffffff 70%, transparent);
+  --sc-shadow-color: 32 30% 8%;
+  --sc-e1: 0 1px 2px hsl(var(--sc-shadow-color) / 0.10), 0 2px 6px -1px hsl(var(--sc-shadow-color) / 0.08);
+  --sc-e2: 0 2px 4px hsl(var(--sc-shadow-color) / 0.10), 0 8px 18px -4px hsl(var(--sc-shadow-color) / 0.12);
+  --sc-e3: 0 4px 8px hsl(var(--sc-shadow-color) / 0.10), 0 18px 40px -8px hsl(var(--sc-shadow-color) / 0.16);
+
+  /* ---- app/admin aliases (Tailwind reads these via tailwind.config.js) ---- */
+  --folio-paper:       var(--sc-canvas);
+  --folio-paper-raised:var(--sc-surface);
+  --folio-ink:         var(--sc-ink);
+  --folio-ink-soft:    var(--sc-ink-soft);
+  --folio-accent:      var(--sc-accent);
+  --folio-accent-ink:  var(--sc-accent-ink);
+  --folio-line:        var(--sc-hairline);
+  --folio-line-strong: var(--sc-hairline-strong);
+
+  /* muted functional states, kept desaturated so they never compete with the
+     one brand accent (taste.md: "the accent owns a region, not confetti") */
+  --folio-positive:      #3F6B48;
+  --folio-positive-soft: #E3E9DD;
+  --folio-warning:       #8A6417;
+  --folio-warning-soft:  #EFE4C7;
+  --folio-info:          #34506E;
+  --folio-info-soft:     #DEE7EE;
+}
+
+/* ============================================================================
+   Dark theme — the same brand world on an inky ground. The accent keeps the
+   same hue so the brand doesn't fork across themes; only luminance swaps.
+   Applied via [data-theme="dark"] on <html>, set by ThemeProvider.
+   ========================================================================== */
+[data-theme="dark"] {
+  --sc-canvas:      #14110E;
+  --sc-surface:     #1E1A15;
+  --sc-ink:         #F0E8D9;
+  --sc-ink-soft:    #A2968A;
+  --sc-accent:      #E8523D;
+  --sc-accent-ink:  #14110E;
+
+  --sc-hairline:        color-mix(in oklab, var(--sc-ink) 16%, transparent);
+  --sc-hairline-strong: color-mix(in oklab, var(--sc-ink) 28%, transparent);
+
+  --folio-positive:      #7AB089;
+  --folio-positive-soft: #1F2A22;
+  --folio-warning:       #D9A656;
+  --folio-warning-soft:  #2A2114;
+  --folio-info:          #7AA3CC;
+  --folio-info-soft:     #14202A;
+}

@@ -1,0 +1,1596 @@
+{
+  "doc": {
+    "height": 19350,
+    "vh": 900,
+    "acts": [
+      "pin",
+      "pin",
+      "pin",
+      "pan",
+      "pin",
+      "pin",
+      "pin",
+      "flow"
+    ],
+    "world": null
+  },
+  "report": [
+    {
+      "i": 0,
+      "y": 25,
+      "pct": 0,
+      "settled": true,
+      "contrast": [
+        {
+          "t": "Document intelligence · Print estimation",
+          "dir": "light-on-dark",
+          "worst": 16.51,
+          "mean": 16.62
+        }
+      ],
+      "cues": [
+        {
+          "t": "Document intelligence · Print estimationKnow w",
+          "o": 1
+        }
+      ],
+      "clips": [],
+      "rails": [
+        0
+      ],
+      "wipes": [
+        "none"
+      ],
+      "act": "pin",
+      "stages": [
+        -25,
+        2135,
+        4115,
+        5735,
+        10685,
+        13025,
+        16805
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(11,13,20)"
+    },
+    {
+      "i": 1,
+      "y": 267,
+      "pct": 1,
+      "settled": true,
+      "contrast": [
+        {
+          "t": "Document intelligence · Print estimation",
+          "dir": "light-on-dark",
+          "worst": 16.51,
+          "mean": 16.61
+        }
+      ],
+      "cues": [
+        {
+          "t": "Document intelligence · Print estimationKnow w",
+          "o": 1
+        }
+      ],
+      "clips": [],
+      "rails": [
+        0
+      ],
+      "wipes": [
+        "none"
+      ],
+      "act": "pin",
+      "stages": [
+        -267,
+        1893,
+        3873,
+        5493,
+        10443,
+        12783,
+        16563
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(11,13,20)"
+    },
+    {
+      "i": 2,
+      "y": 509,
+      "pct": 3,
+      "settled": true,
+      "contrast": [
+        {
+          "t": "Document intelligence · Print estimation",
+          "dir": "light-on-dark",
+          "worst": 16.28,
+          "mean": 16.58
+        },
+        {
+          "t": "File typePDF documentPages100 pagesPrint",
+          "dir": "own-fill",
+          "worst": 15.69,
+          "mean": 15.69
+        }
+      ],
+      "cues": [
+        {
+          "t": "Document intelligence · Print estimationKnow w",
+          "o": 1
+        },
+        {
+          "t": "File typePDF documentPages100 pagesPrint confi",
+          "o": 1
+        }
+      ],
+      "clips": [],
+      "rails": [
+        0
+      ],
+      "wipes": [
+        "none"
+      ],
+      "act": "pin",
+      "stages": [
+        -509,
+        1651,
+        3631,
+        5251,
+        10201,
+        12541,
+        16321
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(11,13,20)"
+    },
+    {
+      "i": 3,
+      "y": 751,
+      "pct": 4,
+      "settled": true,
+      "contrast": [
+        {
+          "t": "File typePDF documentPages100 pagesPrint",
+          "dir": "own-fill",
+          "worst": 15.69,
+          "mean": 15.69
+        }
+      ],
+      "cues": [
+        {
+          "t": "File typePDF documentPages100 pagesPrint confi",
+          "o": 1
+        }
+      ],
+      "clips": [],
+      "rails": [
+        0
+      ],
+      "wipes": [
+        "none"
+      ],
+      "act": "pin",
+      "stages": [
+        -751,
+        1409,
+        3389,
+        5009,
+        9959,
+        12299,
+        16079
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(11,13,20)"
+    },
+    {
+      "i": 4,
+      "y": 993,
+      "pct": 5,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        0
+      ],
+      "wipes": [
+        "none"
+      ],
+      "act": "pin",
+      "stages": [
+        -993,
+        1167,
+        3147,
+        4767,
+        9717,
+        12057,
+        15837
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(11,13,20)"
+    },
+    {
+      "i": 5,
+      "y": 1235,
+      "pct": 7,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        0
+      ],
+      "wipes": [
+        "none"
+      ],
+      "act": "pin",
+      "stages": [
+        -1235,
+        925,
+        2905,
+        4525,
+        9475,
+        11815,
+        15595
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(11,13,20)"
+    },
+    {
+      "i": 6,
+      "y": 2182,
+      "pct": 12,
+      "settled": true,
+      "contrast": [],
+      "cues": [
+        {
+          "t": "The problemYou upload a PDF.Nobody tells you w",
+          "o": 0.05
+        }
+      ],
+      "clips": [],
+      "rails": [
+        0
+      ],
+      "wipes": [
+        "none"
+      ],
+      "act": "pin",
+      "stages": [
+        -2182,
+        -22,
+        1958,
+        3578,
+        8528,
+        10868,
+        14648
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(11,13,20)"
+    },
+    {
+      "i": 7,
+      "y": 2389,
+      "pct": 13,
+      "settled": true,
+      "contrast": [
+        {
+          "t": "The problemYou upload a PDF.Nobody tells",
+          "dir": "light-on-dark",
+          "worst": 16.37,
+          "mean": 16.37
+        }
+      ],
+      "cues": [
+        {
+          "t": "The problemYou upload a PDF.Nobody tells you w",
+          "o": 1
+        }
+      ],
+      "clips": [],
+      "rails": [
+        0
+      ],
+      "wipes": [
+        "none"
+      ],
+      "act": "pin",
+      "stages": [
+        -2389,
+        -229,
+        1751,
+        3371,
+        8321,
+        10661,
+        14441
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(12,14,24)"
+    },
+    {
+      "i": 8,
+      "y": 2596,
+      "pct": 14,
+      "settled": true,
+      "contrast": [],
+      "cues": [
+        {
+          "t": "₹2–₹15per side, unpriced3 appsto upload, check",
+          "o": 0.29
+        }
+      ],
+      "clips": [],
+      "rails": [
+        0
+      ],
+      "wipes": [
+        "none"
+      ],
+      "act": "pin",
+      "stages": [
+        -2596,
+        -436,
+        1544,
+        3164,
+        8114,
+        10454,
+        14234
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(13,15,26)"
+    },
+    {
+      "i": 9,
+      "y": 2804,
+      "pct": 15,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        0
+      ],
+      "wipes": [
+        "none"
+      ],
+      "act": "pin",
+      "stages": [
+        -2804,
+        -644,
+        1336,
+        2956,
+        7906,
+        10246,
+        14026
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(13,15,26)"
+    },
+    {
+      "i": 10,
+      "y": 3011,
+      "pct": 16,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        0
+      ],
+      "wipes": [
+        "none"
+      ],
+      "act": "pin",
+      "stages": [
+        -3011,
+        -851,
+        1129,
+        2749,
+        7699,
+        10039,
+        13819
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(13,15,26)"
+    },
+    {
+      "i": 11,
+      "y": 3218,
+      "pct": 17,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        0
+      ],
+      "wipes": [
+        "circle(0% at 50% 50%)"
+      ],
+      "act": "pin",
+      "stages": [
+        -3218,
+        -1058,
+        922,
+        2542,
+        7492,
+        9832,
+        13612
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(13,15,26)"
+    },
+    {
+      "i": 12,
+      "y": 4154,
+      "pct": 23,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        0
+      ],
+      "wipes": [
+        "circle(0% at 50% 50%)"
+      ],
+      "act": "pin",
+      "stages": [
+        -4154,
+        -1994,
+        -14,
+        1606,
+        6556,
+        8896,
+        12676
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(13,15,26)"
+    },
+    {
+      "i": 13,
+      "y": 4293,
+      "pct": 23,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        0
+      ],
+      "wipes": [
+        "circle(7.2% at 50% 50%)"
+      ],
+      "act": "pin",
+      "stages": [
+        -4293,
+        -2133,
+        -153,
+        1467,
+        6417,
+        8757,
+        12537
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(12,14,22)"
+    },
+    {
+      "i": 14,
+      "y": 4431,
+      "pct": 24,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        0
+      ],
+      "wipes": [
+        "circle(39.81% at 50% 50%)"
+      ],
+      "act": "pin",
+      "stages": [
+        -4431,
+        -2271,
+        -291,
+        1329,
+        6279,
+        8619,
+        12399
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(11,13,20)"
+    },
+    {
+      "i": 15,
+      "y": 4569,
+      "pct": 25,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        0
+      ],
+      "wipes": [
+        "circle(71.76% at 50% 50%)"
+      ],
+      "act": "pin",
+      "stages": [
+        -4569,
+        -2409,
+        -429,
+        1191,
+        6141,
+        8481,
+        12261
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(11,13,20)"
+    },
+    {
+      "i": 16,
+      "y": 4707,
+      "pct": 26,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        0
+      ],
+      "wipes": [
+        "circle(78% at 50% 50%)"
+      ],
+      "act": "pin",
+      "stages": [
+        -4707,
+        -2547,
+        -567,
+        1053,
+        6003,
+        8343,
+        12123
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(11,13,20)"
+    },
+    {
+      "i": 17,
+      "y": 4846,
+      "pct": 26,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        0
+      ],
+      "wipes": [
+        "circle(78% at 50% 50%)"
+      ],
+      "act": "pin",
+      "stages": [
+        -4846,
+        -2686,
+        -706,
+        914,
+        5864,
+        8204,
+        11984
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(11,13,20)"
+    },
+    {
+      "i": 18,
+      "y": 5841,
+      "pct": 32,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        -7
+      ],
+      "wipes": [
+        "circle(78% at 50% 50%)"
+      ],
+      "act": "pan",
+      "stages": [
+        -5841,
+        -3681,
+        -1701,
+        -81,
+        4869,
+        7209,
+        10989
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(11,13,20)"
+    },
+    {
+      "i": 19,
+      "y": 6619,
+      "pct": 36,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        -76
+      ],
+      "wipes": [
+        "circle(78% at 50% 50%)"
+      ],
+      "act": "pan",
+      "stages": [
+        -6619,
+        -4459,
+        -2479,
+        -859,
+        4091,
+        6431,
+        10211
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(12,14,24)"
+    },
+    {
+      "i": 20,
+      "y": 7396,
+      "pct": 40,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        -144
+      ],
+      "wipes": [
+        "circle(78% at 50% 50%)"
+      ],
+      "act": "pan",
+      "stages": [
+        -7396,
+        -5236,
+        -3256,
+        -1636,
+        3314,
+        5654,
+        9434
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(13,15,26)"
+    },
+    {
+      "i": 21,
+      "y": 8174,
+      "pct": 44,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        -212
+      ],
+      "wipes": [
+        "circle(78% at 50% 50%)"
+      ],
+      "act": "pan",
+      "stages": [
+        -8174,
+        -6014,
+        -4034,
+        -2414,
+        2536,
+        4876,
+        8656
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(13,15,26)"
+    },
+    {
+      "i": 22,
+      "y": 8951,
+      "pct": 49,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        -281
+      ],
+      "wipes": [
+        "circle(78% at 50% 50%)"
+      ],
+      "act": "pan",
+      "stages": [
+        -8951,
+        -6791,
+        -4811,
+        -3191,
+        1759,
+        4099,
+        7879
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(13,15,26)"
+    },
+    {
+      "i": 23,
+      "y": 9729,
+      "pct": 53,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        -349
+      ],
+      "wipes": [
+        "circle(78% at 50% 50%)"
+      ],
+      "act": "pan",
+      "stages": [
+        -9729,
+        -7569,
+        -5589,
+        -3969,
+        981,
+        3321,
+        7101
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(13,15,26)"
+    },
+    {
+      "i": 24,
+      "y": 10739,
+      "pct": 58,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        -356
+      ],
+      "wipes": [
+        "circle(78% at 50% 50%)"
+      ],
+      "act": "pin",
+      "stages": [
+        -10739,
+        -8579,
+        -6599,
+        -4979,
+        -29,
+        2311,
+        6091
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(13,15,26)"
+    },
+    {
+      "i": 25,
+      "y": 11015,
+      "pct": 60,
+      "settled": true,
+      "contrast": [
+        {
+          "t": "How it worksOne document, four steps.",
+          "dir": "light-on-dark",
+          "worst": 16.51,
+          "mean": 16.51
+        }
+      ],
+      "cues": [
+        {
+          "t": "How it worksOne document, four steps.",
+          "o": 1
+        }
+      ],
+      "clips": [],
+      "rails": [
+        -356
+      ],
+      "wipes": [
+        "circle(78% at 50% 50%)"
+      ],
+      "act": "pin",
+      "stages": [
+        -11015,
+        -8855,
+        -6875,
+        -5255,
+        -305,
+        2035,
+        5815
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(12,14,22)"
+    },
+    {
+      "i": 26,
+      "y": 11292,
+      "pct": 61,
+      "settled": true,
+      "contrast": [
+        {
+          "t": "UploadAnalyze₹EstimateShareUpload docume",
+          "dir": "light-on-dark",
+          "worst": 16.62,
+          "mean": 16.62
+        }
+      ],
+      "cues": [
+        {
+          "t": "UploadAnalyze₹EstimateShareUpload documentIden",
+          "o": 1
+        }
+      ],
+      "clips": [],
+      "rails": [
+        -356
+      ],
+      "wipes": [
+        "circle(78% at 50% 50%)"
+      ],
+      "act": "pin",
+      "stages": [
+        -11292,
+        -9132,
+        -7152,
+        -5532,
+        -582,
+        1758,
+        5538
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(11,13,20)"
+    },
+    {
+      "i": 27,
+      "y": 11568,
+      "pct": 63,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        -356
+      ],
+      "wipes": [
+        "circle(78% at 50% 50%)"
+      ],
+      "act": "pin",
+      "stages": [
+        -11568,
+        -9408,
+        -7428,
+        -5808,
+        -858,
+        1482,
+        5262
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(11,13,20)"
+    },
+    {
+      "i": 28,
+      "y": 11845,
+      "pct": 64,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        -356
+      ],
+      "wipes": [
+        "circle(78% at 50% 50%)"
+      ],
+      "act": "pin",
+      "stages": [
+        -11845,
+        -9685,
+        -7705,
+        -6085,
+        -1135,
+        1205,
+        4985
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(11,13,20)"
+    },
+    {
+      "i": 29,
+      "y": 12121,
+      "pct": 66,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        -356
+      ],
+      "wipes": [
+        "circle(78% at 50% 50%)"
+      ],
+      "act": "pin",
+      "stages": [
+        -12121,
+        -9961,
+        -7981,
+        -6361,
+        -1411,
+        929,
+        4709
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(11,13,20)"
+    },
+    {
+      "i": 30,
+      "y": 13108,
+      "pct": 71,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        -356
+      ],
+      "wipes": [
+        "circle(78% at 50% 50%)"
+      ],
+      "act": "pin",
+      "stages": [
+        -13108,
+        -10948,
+        -8968,
+        -7348,
+        -2398,
+        -58,
+        3722
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(11,13,20)"
+    },
+    {
+      "i": 31,
+      "y": 13661,
+      "pct": 74,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        -356
+      ],
+      "wipes": [
+        "circle(78% at 50% 50%)"
+      ],
+      "act": "pin",
+      "stages": [
+        -13661,
+        -11501,
+        -9521,
+        -7901,
+        -2951,
+        -611,
+        3169
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(15,13,24)"
+    },
+    {
+      "i": 32,
+      "y": 14214,
+      "pct": 77,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        -356
+      ],
+      "wipes": [
+        "circle(78% at 50% 50%)"
+      ],
+      "act": "pin",
+      "stages": [
+        -14214,
+        -12054,
+        -10074,
+        -8454,
+        -3504,
+        -1164,
+        2616
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(17,13,26)"
+    },
+    {
+      "i": 33,
+      "y": 14766,
+      "pct": 80,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        -356
+      ],
+      "wipes": [
+        "circle(78% at 50% 50%)"
+      ],
+      "act": "pin",
+      "stages": [
+        -14766,
+        -12606,
+        -10626,
+        -9006,
+        -4056,
+        -1716,
+        2064
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(17,13,26)"
+    },
+    {
+      "i": 34,
+      "y": 15319,
+      "pct": 83,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        -356
+      ],
+      "wipes": [
+        "circle(78% at 50% 50%)"
+      ],
+      "act": "pin",
+      "stages": [
+        -15319,
+        -13159,
+        -11179,
+        -9559,
+        -4609,
+        -2269,
+        1511
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(17,13,26)"
+    },
+    {
+      "i": 35,
+      "y": 15872,
+      "pct": 86,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        -356
+      ],
+      "wipes": [
+        "circle(78% at 50% 50%)"
+      ],
+      "act": "pin",
+      "stages": [
+        -15872,
+        -13712,
+        -11732,
+        -10112,
+        -5162,
+        -2822,
+        958
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(17,13,26)"
+    },
+    {
+      "i": 36,
+      "y": 16848,
+      "pct": 91,
+      "settled": true,
+      "contrast": [],
+      "cues": [
+        {
+          "t": "CommunitySomeone has it.Ask for it here.",
+          "o": 0.04
+        }
+      ],
+      "clips": [],
+      "rails": [
+        -356
+      ],
+      "wipes": [
+        "circle(78% at 50% 50%)"
+      ],
+      "act": "pin",
+      "stages": [
+        -16848,
+        -14688,
+        -12708,
+        -11088,
+        -6138,
+        -3798,
+        -18
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(17,13,26)"
+    },
+    {
+      "i": 37,
+      "y": 17021,
+      "pct": 92,
+      "settled": true,
+      "contrast": [
+        {
+          "t": "CommunitySomeone has it.Ask for it here.",
+          "dir": "light-on-dark",
+          "worst": 16.38,
+          "mean": 16.38
+        }
+      ],
+      "cues": [
+        {
+          "t": "CommunitySomeone has it.Ask for it here.",
+          "o": 1
+        }
+      ],
+      "clips": [],
+      "rails": [
+        -356
+      ],
+      "wipes": [
+        "circle(78% at 50% 50%)"
+      ],
+      "act": "pin",
+      "stages": [
+        -17021,
+        -14861,
+        -12881,
+        -11261,
+        -6311,
+        -3971,
+        -191
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(14,14,26)"
+    },
+    {
+      "i": 38,
+      "y": 17194,
+      "pct": 93,
+      "settled": true,
+      "contrast": [
+        {
+          "t": "CommunitySomeone has it.Ask for it here.",
+          "dir": "light-on-dark",
+          "worst": 16.31,
+          "mean": 16.31
+        }
+      ],
+      "cues": [
+        {
+          "t": "CommunitySomeone has it.Ask for it here.",
+          "o": 0.96
+        },
+        {
+          "t": "The community module is where the exchange hap",
+          "o": 0.69
+        }
+      ],
+      "clips": [],
+      "rails": [
+        -356
+      ],
+      "wipes": [
+        "circle(78% at 50% 50%)"
+      ],
+      "act": "pin",
+      "stages": [
+        -17194,
+        -15034,
+        -13054,
+        -11434,
+        -6484,
+        -4144,
+        -364
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(13,15,26)"
+    },
+    {
+      "i": 39,
+      "y": 17366,
+      "pct": 94,
+      "settled": true,
+      "contrast": [
+        {
+          "t": "The community module is where the exchan",
+          "dir": "light-on-dark",
+          "worst": 16.31,
+          "mean": 16.31
+        }
+      ],
+      "cues": [
+        {
+          "t": "The community module is where the exchange hap",
+          "o": 1
+        }
+      ],
+      "clips": [],
+      "rails": [
+        -356
+      ],
+      "wipes": [
+        "circle(78% at 50% 50%)"
+      ],
+      "act": "pin",
+      "stages": [
+        -17366,
+        -15206,
+        -13226,
+        -11606,
+        -6656,
+        -4316,
+        -536
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(13,15,26)"
+    },
+    {
+      "i": 40,
+      "y": 17539,
+      "pct": 95,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        -356
+      ],
+      "wipes": [
+        "circle(78% at 50% 50%)"
+      ],
+      "act": "pin",
+      "stages": [
+        -17539,
+        -15379,
+        -13399,
+        -11779,
+        -6829,
+        -4489,
+        -709
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(13,15,26)"
+    },
+    {
+      "i": 41,
+      "y": 17712,
+      "pct": 96,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        -356
+      ],
+      "wipes": [
+        "circle(78% at 50% 50%)"
+      ],
+      "act": "pin",
+      "stages": [
+        -17712,
+        -15552,
+        -13572,
+        -11952,
+        -7002,
+        -4662,
+        -882
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(13,15,26)"
+    },
+    {
+      "i": 42,
+      "y": 17759,
+      "pct": 96,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        -356
+      ],
+      "wipes": [
+        "circle(78% at 50% 50%)"
+      ],
+      "act": "pin",
+      "stages": [
+        -17759,
+        -15599,
+        -13619,
+        -11999,
+        -7049,
+        -4709,
+        -929
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(13,15,26)"
+    },
+    {
+      "i": 43,
+      "y": 18041,
+      "pct": 98,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        -356
+      ],
+      "wipes": [
+        "circle(78% at 50% 50%)"
+      ],
+      "act": "pin",
+      "stages": [
+        -18041,
+        -15881,
+        -13901,
+        -12281,
+        -7331,
+        -4991,
+        -1211
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(12,14,22)"
+    },
+    {
+      "i": 44,
+      "y": 18322,
+      "pct": 99,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        -356
+      ],
+      "wipes": [
+        "circle(78% at 50% 50%)"
+      ],
+      "act": "flow",
+      "stages": [
+        -18322,
+        -16162,
+        -14182,
+        -12562,
+        -7612,
+        -5272,
+        -1492
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(11,13,20)"
+    },
+    {
+      "i": 45,
+      "y": 18450,
+      "pct": 100,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        -356
+      ],
+      "wipes": [
+        "circle(78% at 50% 50%)"
+      ],
+      "act": "flow",
+      "stages": [
+        -18450,
+        -16290,
+        -14310,
+        -12690,
+        -7740,
+        -5400,
+        -1620
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "rgb(11,13,20)"
+    }
+  ],
+  "consoleErrors": [],
+  "failed": []
+}
