@@ -20,8 +20,13 @@ config = context.config
 
 # Always use the same DATABASE_URL the application itself uses, so
 # migrations and the app can never drift apart.
+#
+# NOTE: we do NOT call config.set_main_option() here because alembic's
+# underlying configparser interprets '%' as variable interpolation, which
+# breaks URL-encoded passwords (e.g. %24 for '$'). We pass the URL directly
+# to engine_from_config() further down, bypassing the ini file.
 settings = get_settings()
-config.set_main_option("sqlalchemy.url", settings.database_url)
+DATABASE_URL = settings.database_url
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -49,7 +54,7 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url")
+    url = DATABASE_URL
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -72,6 +77,7 @@ def run_migrations_online() -> None:
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
+        url=DATABASE_URL,
     )
 
     with connectable.connect() as connection:
