@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Search, MoreVertical, Download, Pencil, Trash2, Share2, Check } from "lucide-react";
+import { Search, MoreVertical, Download, Pencil, Trash2, Share2, Check, Calculator } from "lucide-react";
 import { PageHeader } from "../../components/app/PageHeader";
 import { FileIcon } from "../../components/ui/FileIcon";
 import { Badge } from "../../components/ui/Badge";
@@ -9,6 +9,7 @@ import { UploadDropzone } from "../../components/app/UploadDropzone";
 import { RenameModal } from "../../components/app/RenameModal";
 import { ConfirmModal } from "../../components/app/ConfirmModal";
 import { ShareModal } from "../../components/app/ShareModal";
+import { EstimateModal } from "../../components/app/EstimateModal";
 import { useAsync } from "../../hooks/useAsync";
 import { useDebouncedValue } from "../../hooks/useDebouncedValue";
 import { useToast } from "../../components/ui/Toast";
@@ -19,14 +20,39 @@ import {
   renameDocument,
   uploadDocument,
 } from "../../services/documentService";
+import { createEstimate, type EstimateResponse } from "../../services/printService";
 import type { DocumentCategory } from "../../types/document";
 import type { FileResponse } from "../../services/documentService";
 import { formatBytes } from "../../utils/bytes";
 import { formatDate, relativeTime } from "../../utils/date";
+import { formatPaise, rupeesToPaise } from "../../utils/currency";
 import { inferTypeInfo } from "../../utils/fileType";
 
 type SortKey = "recent" | "name" | "size";
 const CATEGORIES: (DocumentCategory | "All")[] = ["All", "PDF", "Word", "Excel", "PowerPoint", "Text", "Image", "Other"];
+
+const BYTES_PER_PAGE: Record<DocumentCategory, number> = {
+  PDF: 50000,
+  Word: 20000,
+  Excel: 30000,
+  PowerPoint: 500000,
+  Text: 3000,
+  Image: 100000,
+  Other: 20000,
+};
+
+function inferPageCount(name: string, sizeBytes: number): number {
+  const ext = name.split(".").pop()?.toLowerCase() ?? "";
+  const extToCategory: Record<string, DocumentCategory> = {
+    pdf: "PDF", doc: "Word", docx: "Word", xls: "Excel", xlsx: "Excel", csv: "Excel",
+    ppt: "PowerPoint", pptx: "PowerPoint", txt: "Text", md: "Text",
+    png: "Image", jpg: "Image", jpeg: "Image", gif: "Image", webp: "Image", bmp: "Image",
+  };
+  const cat: DocumentCategory = extToCategory[ext] ?? "Other";
+  if (cat === "Image") return 1;
+  if (cat === "Text") return Math.max(1, Math.ceil(sizeBytes / 3000));
+  return Math.max(1, Math.ceil(sizeBytes / BYTES_PER_PAGE[cat]));
+}
 
 export function Documents() {
   const { data, loading, setData } = useAsync(listDocuments, []);
@@ -41,6 +67,8 @@ export function Documents() {
   const [renaming, setRenaming] = useState<FileResponse | null>(null);
   const [deleting, setDeleting] = useState<FileResponse | null>(null);
   const [sharing, setSharing] = useState<FileResponse | null>(null);
+  const [estimating, setEstimating] = useState<FileResponse | null>(null);
+  const [estimatesByFile, setEstimatesByFile] = useState<Record<number, EstimateResponse>>({});
   const [downloadedId, setDownloadedId] = useState<number | null>(null);
   const [uploading, setUploading] = useState(false);
 
@@ -76,6 +104,19 @@ export function Documents() {
       for (const file of files) {
         const doc = await uploadDocument(file);
         setData({ ...data!, items: [doc, ...documents] });
+        // Auto-create a default estimate (B&W, duplex, 1 copy) so the price shows up immediately.
+        try {
+          const pageCount = inferPageCount(file.name, file.size);
+          const est = await createEstimate({
+            page_count: pageCount,
+            copies: 1,
+            color_mode: "bw",
+            print_type: "duplex",
+          });
+          setEstimatesByFile((prev) => ({ ...prev, [doc.id]: est }));
+        } catch {
+          // Price is optional — if it fails, the user can still calculate manually via the pill.
+        }
       }
       push(files.length > 1 ? `${files.length} files uploaded` : "File uploaded");
     } finally {
@@ -109,7 +150,7 @@ export function Documents() {
     <div>
       <PageHeader
         title="Documents"
-        description="Upload, organize, and manage all your documents in COSTlY."
+        description="Upload, organize, and manage all your documents in COSTTY."
       />
 
       <UploadDropzone onFiles={handleFiles} compact />
@@ -152,6 +193,7 @@ export function Documents() {
           <div className="divide-y divide-line rounded-md border border-line">
             {filtered.map((doc) => {
               const info = inferTypeInfo(doc.filename);
+              const est = estimatesByFile[doc.id];
               return (
                 <div key={doc.id} className="group flex items-center gap-3 px-4 py-3">
                   <FileIcon category={info.category} className="shrink-0 text-ink-soft" />
@@ -162,6 +204,15 @@ export function Documents() {
                     </p>
                   </div>
                   <Badge className="hidden sm:inline-flex">{info.category}</Badge>
+
+                  <button
+                    onClick={() => setEstimating(doc)}
+                    className="flex shrink-0 items-center gap-1.5 rounded-sm border border-line-strong bg-paper px-2.5 py-1 font-mono text-xs font-semibold text-accent transition-colors hover:border-accent hover:bg-accent/10"
+                    title={est ? "Edit estimate" : "Calculate price"}
+                  >
+                    <Calculator size={12} />
+                    {est ? formatPaise(rupeesToPaise(Number(est.total_cost))) : "Estimate"}
+                  </button>
 
                   <div className="relative shrink-0">
                     <button
@@ -243,6 +294,16 @@ export function Documents() {
       )}
       {sharing && (
         <ShareModal open onClose={() => setSharing(null)} fileId={sharing.id} fileName={sharing.filename} />
+      )}
+      {estimating && (
+        <EstimateModal
+          open
+          onClose={() => setEstimating(null)}
+          fileId={estimating.id}
+          fileName={estimating.filename}
+          initialPageCount={inferPageCount(estimating.filename, estimating.size_bytes)}
+          onSaved={(est) => setEstimatesByFile((prev) => ({ ...prev, [estimating.id]: est }))}
+        />
       )}
     </div>
   );

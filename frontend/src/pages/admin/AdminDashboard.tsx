@@ -20,7 +20,7 @@ export function AdminDashboard() {
     <div className="space-y-10">
       <div>
         <h1 className="font-display text-2xl font-bold text-ink">Platform Overview</h1>
-        <p className="mt-1 text-sm text-ink-soft">Live snapshot of COSTlY's activity and revenue.</p>
+        <p className="mt-1 text-sm text-ink-soft">Live snapshot of COSTTY's activity and revenue.</p>
       </div>
 
       {/* KPI row */}

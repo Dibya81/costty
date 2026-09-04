@@ -14,6 +14,7 @@ const Dashboard    = lazy(() => import("./pages/app/Dashboard").then((m) => ({ d
 const Documents    = lazy(() => import("./pages/app/Documents").then((m) => ({ default: m.Documents })));
 const Intelligence = lazy(() => import("./pages/app/Intelligence").then((m) => ({ default: m.Intelligence })));
 const Estimator    = lazy(() => import("./pages/app/Estimator").then((m) => ({ default: m.Estimator })));
+const Prices       = lazy(() => import("./pages/app/Prices").then((m) => ({ default: m.Prices })));
 const SharedFiles  = lazy(() => import("./pages/app/SharedFiles").then((m) => ({ default: m.SharedFiles })));
 const Community    = lazy(() => import("./pages/app/Community").then((m) => ({ default: m.Community })));
 const Profile      = lazy(() => import("./pages/app/Profile").then((m) => ({ default: m.Profile })));
@@ -54,6 +55,7 @@ function App() {
                 <Route path="documents"    element={<Documents />} />
                 <Route path="intelligence" element={<Intelligence />} />
                 <Route path="estimator"    element={<Estimator />} />
+                <Route path="prices"       element={<Prices />} />
                 <Route path="shared"       element={<SharedFiles />} />
                 <Route path="community"    element={<Community />} />
                 <Route path="profile"      element={<Profile />} />

@@ -89,7 +89,7 @@ export function AdminSettings() {
       {/* Platform Info */}
       <section className="rounded-md border border-line bg-paper-raised/40 p-6">
         <h2 className="mb-2 font-display text-sm font-semibold text-ink">Platform</h2>
-        <p className="text-xs text-ink-soft">COSTlY v0.1 preview · Additional platform settings coming soon.</p>
+        <p className="text-xs text-ink-soft">COSTTY v0.1 preview · Additional platform settings coming soon.</p>
       </section>
 
       {/* Logout */}

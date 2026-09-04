@@ -1,1016 +1,974 @@
-import { useEffect, useRef, useState } from "react";
-import "../lib/scrollcraft/scrollcraft.css";
-import "../lib/scrollcraft/scrollcraft.js";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
-  FileText,
-  ScanSearch,
   Calculator,
-  Users,
-  Check,
-  Copy,
-  Terminal,
-  FileSpreadsheet,
-  Presentation,
-  Sparkles,
-  ShieldCheck,
   CheckCircle2,
-  Code2,
-  FileCode,
-  Sliders,
-  Layers,
-  AlertCircle,
-  Clock,
-  TrendingDown,
-  Lock,
-  Zap,
+  ChevronDown,
+  FileArchive,
+  FileText,
+  FolderSearch,
+  LockKeyhole,
+  Menu,
+  Search,
+  Send,
+  Share2,
+  Sparkles,
+  Upload,
+  Users,
+  X,
 } from "lucide-react";
+import "../lib/scrollcraft/scrollcraft.css";
+import "../lib/scrollcraft/scrollcraft.js";
+import { ThemeToggle } from "../components/app/ThemeToggle";
+import { calculateEstimate } from "../services/printService";
 import { formatPaise } from "../utils/currency";
 
-const TOKENS = `
-:root {
-  --sc-canvas:      #080A10;
-  --sc-surface:     #111422;
-  --sc-surface-raised: #181C2E;
-  --sc-ink:         #F3F4F6;
-  --sc-ink-soft:    #94A3B8;
-  --sc-accent:      #F97316;
-  --sc-accent-glow: rgba(249, 115, 22, 0.25);
-  --sc-accent-ink:  #FFFFFF;
-
-  --sc-hairline:        rgba(255, 255, 255, 0.08);
-  --sc-hairline-strong: rgba(255, 255, 255, 0.16);
-
-  --sc-font-display: "Archivo", system-ui, sans-serif;
-  --sc-font-text:    "IBM Plex Sans", system-ui, sans-serif;
-  --sc-font-mono:    "IBM Plex Mono", ui-monospace, monospace;
-
-  --sc-shadow-color: 220 40% 2%;
-  --sc-e1: 0 4px 20px -2px rgba(0, 0, 0, 0.5), 0 2px 6px -1px rgba(0, 0, 0, 0.3);
-  --sc-e2: 0 12px 36px -4px rgba(0, 0, 0, 0.6), 0 0 20px 0 var(--sc-accent-glow);
+const styles = `
+.costly-landing {
+  --cl-bg: #f6f1e6;
+  --cl-bg-deep: #ebe2d0;
+  --cl-panel: rgba(255, 251, 242, 0.78);
+  --cl-panel-strong: rgba(255, 251, 242, 0.94);
+  --cl-ink: #17120d;
+  --cl-muted: #736959;
+  --cl-line: rgba(28, 23, 15, 0.14);
+  --cl-line-strong: rgba(28, 23, 15, 0.24);
+  --cl-accent: #d9472b;
+  --cl-accent-soft: rgba(217, 71, 43, 0.14);
+  --cl-good: #317454;
+  --cl-blue: #315f86;
+  --cl-violet: #70528f;
+  --cl-shadow: 0 24px 80px rgba(45, 31, 16, 0.18);
+  min-height: 100vh;
+  overflow-x: clip;
+  background:
+    radial-gradient(80rem 44rem at 74% -10%, rgba(217, 71, 43, 0.16), transparent 58%),
+    linear-gradient(180deg, var(--cl-bg), var(--cl-bg-deep) 38%, var(--cl-bg) 100%);
+  color: var(--cl-ink);
+  cursor: default;
+}
+[data-theme="dark"] .costly-landing {
+  --cl-bg: #090b10;
+  --cl-bg-deep: #10131c;
+  --cl-panel: rgba(18, 22, 32, 0.72);
+  --cl-panel-strong: rgba(17, 21, 31, 0.94);
+  --cl-ink: #f5efe4;
+  --cl-muted: #a79d90;
+  --cl-line: rgba(245, 239, 228, 0.12);
+  --cl-line-strong: rgba(245, 239, 228, 0.22);
+  --cl-accent: #f26a3d;
+  --cl-accent-soft: rgba(242, 106, 61, 0.15);
+  --cl-good: #7ab089;
+  --cl-blue: #7aa3cc;
+  --cl-violet: #b09ad0;
+  --cl-shadow: 0 28px 90px rgba(0, 0, 0, 0.42);
+  background:
+    radial-gradient(74rem 38rem at 74% -10%, rgba(242, 106, 61, 0.15), transparent 58%),
+    radial-gradient(54rem 36rem at 12% 8%, rgba(122, 163, 204, 0.12), transparent 62%),
+    linear-gradient(180deg, var(--cl-bg), var(--cl-bg-deep) 42%, var(--cl-bg) 100%);
+}
+.costly-landing a { text-decoration: none; }
+.cl-noise {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.35;
+  z-index: 0;
+  background-image:
+    linear-gradient(var(--cl-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--cl-line) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: linear-gradient(to bottom, black, transparent 72%);
+}
+.cl-nav {
+  position: fixed;
+  inset: 16px 16px auto;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border: 1px solid var(--cl-line);
+  background: color-mix(in oklab, var(--cl-bg) 84%, transparent);
+  backdrop-filter: blur(18px);
+  border-radius: 8px;
+  padding: 10px 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+}
+.cl-brand { display: inline-flex; align-items: center; gap: 10px; color: var(--cl-ink); font-weight: 800; letter-spacing: 0; }
+.cl-brand-mark { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 7px; background: var(--cl-accent); color: white; }
+.cl-nav-links { display: flex; align-items: center; gap: 22px; color: var(--cl-muted); font: 700 11px var(--sc-font-mono); text-transform: uppercase; letter-spacing: 0.08em; }
+.cl-nav-links a:hover { color: var(--cl-ink); }
+.cl-nav-actions { display: flex; align-items: center; gap: 8px; }
+.cl-link { color: var(--cl-muted); padding: 8px 10px; border-radius: 6px; font-size: 14px; font-weight: 650; transition: color 160ms, background 160ms; }
+.cl-link:hover { color: var(--cl-ink); background: var(--cl-panel); }
+.cl-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  border: 1px solid var(--cl-line-strong);
+  border-radius: 7px;
+  padding: 10px 15px;
+  color: var(--cl-ink);
+  background: var(--cl-panel);
+  font-weight: 750;
+  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease, color 160ms ease;
+}
+.cl-button:hover { transform: translateY(-1px); border-color: color-mix(in oklab, var(--cl-accent) 48%, var(--cl-line)); }
+.cl-button:active { transform: translateY(0) scale(0.98); }
+.cl-button--primary { border-color: var(--cl-accent); background: var(--cl-accent); color: #fff; }
+.cl-menu-button { display: none; border: 0; background: transparent; color: var(--cl-ink); padding: 8px; }
+.cl-mobile-menu { display: none; }
+.cl-section { position: relative; z-index: 1; padding: clamp(5rem, 10vw, 9rem) clamp(1.1rem, 4vw, 4rem); }
+.cl-wrap { width: min(1180px, 100%); margin: 0 auto; }
+.cl-kicker { color: var(--cl-accent); font: 800 11px var(--sc-font-mono); letter-spacing: 0.12em; text-transform: uppercase; }
+.cl-title { margin: 12px 0 0; font-size: clamp(2.3rem, 6vw, 6.7rem); line-height: 0.94; letter-spacing: 0; font-weight: 850; max-width: 980px; }
+.cl-subtitle { max-width: 620px; margin-top: 22px; color: var(--cl-muted); font-size: clamp(1rem, 1.8vw, 1.25rem); line-height: 1.55; }
+.cl-hero {
+  position: relative;
+  min-height: 100svh;
+  padding: 108px clamp(1rem, 4vw, 4rem) 54px;
+  display: grid;
+  place-items: center;
+  overflow: clip;
+  perspective: 1200px;
+}
+.cl-hero::before {
+  content: "";
+  position: absolute;
+  inset: 78px 16px 16px;
+  border: 1px solid var(--cl-line);
+  border-radius: 10px;
+  background:
+    radial-gradient(circle at calc(50% + var(--px, 0) * 18%) calc(42% + var(--py, 0) * 14%), var(--cl-accent-soft), transparent 28%),
+    linear-gradient(120deg, transparent 0 46%, color-mix(in oklab, var(--cl-accent) 18%, transparent) 47% 48%, transparent 49% 100%);
+  opacity: 0.68;
+  pointer-events: none;
+}
+.cl-hero::after {
+  content: "";
+  position: absolute;
+  inset: 78px 16px 16px;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, transparent, color-mix(in oklab, var(--cl-accent) 58%, transparent), transparent),
+    linear-gradient(180deg, transparent, color-mix(in oklab, var(--cl-ink) 10%, transparent), transparent);
+  background-size: 42% 1px, 1px 38%;
+  background-position:
+    calc(46% + var(--px, 0) * 7%) calc(44% + var(--py, 0) * 10%),
+    calc(68% + var(--px, 0) * 8%) calc(42% + var(--py, 0) * 8%);
+  background-repeat: no-repeat;
+  opacity: 0.56;
+}
+.cl-hero-grid { width: min(1220px, 100%); display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, 0.78fr); gap: clamp(2rem, 6vw, 5rem); align-items: center; }
+.cl-hero-copy { position: relative; z-index: 4; }
+.cl-hero-title { font-size: clamp(3rem, 8vw, 8.6rem); line-height: 0.9; letter-spacing: 0; font-weight: 900; max-width: 860px; margin: 0; }
+.cl-hero-title span { color: var(--cl-accent); }
+.cl-hero-lede { color: var(--cl-muted); max-width: 560px; font-size: clamp(1rem, 1.7vw, 1.2rem); line-height: 1.6; margin: 24px 0 0; }
+.cl-hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 34px; }
+.cl-format-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 26px; }
+.cl-format { border: 1px solid var(--cl-line); background: var(--cl-panel); color: var(--cl-muted); border-radius: 6px; padding: 5px 8px; font: 800 11px var(--sc-font-mono); }
+.cl-format:nth-child(1) { color: var(--cl-accent); }
+.cl-format:nth-child(2) { color: var(--cl-blue); }
+.cl-format:nth-child(3) { color: var(--cl-good); }
+.cl-format:nth-child(4) { color: var(--cl-violet); }
+.cl-document-space { min-height: 600px; position: relative; transform-style: preserve-3d; }
+.cl-document-space::before {
+  content: "";
+  position: absolute;
+  inset: 14% 2% 8%;
+  border: 1px solid var(--cl-line);
+  border-radius: 50%;
+  transform: rotateX(68deg) rotateZ(calc(var(--px, 0) * 8deg));
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--cl-accent) 18%, transparent);
+  opacity: 0.72;
+}
+.cl-document-space::after {
+  content: "";
+  position: absolute;
+  left: 12%;
+  right: 6%;
+  top: 50%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--cl-line-strong), var(--cl-accent), transparent);
+  transform: translateY(-50%) rotate(-10deg);
+  opacity: 0.76;
+}
+.cl-orbit { position: absolute; inset: -10% -12%; transform-style: preserve-3d; transform: rotateX(calc(var(--py, 0) * -8deg)) rotateY(calc(var(--px, 0) * 10deg)); transition: transform 120ms linear; }
+.cl-float-doc {
+  position: absolute;
+  pointer-events: none;
+  width: var(--w, 142px);
+  min-height: var(--h, 188px);
+  padding: 12px;
+  border: 1px solid var(--cl-line);
+  border-radius: 8px;
+  background: var(--cl-panel);
+  box-shadow: var(--cl-shadow);
+  transform: translate3d(var(--repel-x, 0px), var(--repel-y, 0px), 0)
+    translate3d(calc(var(--px, 0) * var(--mx, 0px)), calc(var(--py, 0) * var(--my, 0px)), var(--depth, 0px))
+    rotateZ(var(--r, 0deg));
+  --repel-x: 0px;
+  --repel-y: 0px;
+  will-change: transform;
+  transition: --repel-x 320ms cubic-bezier(0.2, 0.8, 0.2, 1), --repel-y 320ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  animation: cl-drift var(--dur, 11s) ease-in-out infinite alternate;
+}
+.cl-float-doc::before { content: ""; display: block; height: 9px; width: 42%; border-radius: 99px; background: currentColor; opacity: 0.52; margin-bottom: 14px; }
+.cl-float-doc::after { content: ""; display: block; height: 52px; margin-top: 16px; border: 1px solid var(--cl-line); border-radius: 5px; background: linear-gradient(135deg, transparent 42%, currentColor 43% 46%, transparent 47%); opacity: 0.28; }
+.cl-float-doc small { display: block; color: currentColor; font: 850 11px var(--sc-font-mono); letter-spacing: 0.06em; }
+.cl-float-doc i { display: block; height: 1px; background: var(--cl-line-strong); margin: 8px 0; opacity: 0.85; }
+.doc-a { left: 3%; top: 9%; color: var(--cl-accent); --w: 132px; --h: 180px; --r: -9deg; --mx: -26px; --my: 16px; --depth: -80px; --dur: 12s; }
+.doc-b { right: 8%; top: 4%; color: var(--cl-blue); --w: 168px; --h: 122px; --r: 7deg; --mx: 18px; --my: -18px; --depth: 60px; --dur: 10s; }
+.doc-c { left: 0; bottom: 13%; color: var(--cl-good); --w: 178px; --h: 126px; --r: 6deg; --mx: 30px; --my: 8px; --depth: -30px; --dur: 13s; }
+.doc-d { right: 0; bottom: 5%; color: var(--cl-violet); --w: 136px; --h: 184px; --r: -5deg; --mx: -22px; --my: 24px; --depth: -120px; --dur: 11s; }
+.doc-e { right: 32%; top: 36%; color: var(--cl-muted); --w: 110px; --h: 150px; --r: 13deg; --mx: 14px; --my: -16px; --depth: -180px; --dur: 14s; opacity: 0.62; }
+.doc-f { left: 30%; top: -2%; color: var(--cl-good); --w: 116px; --h: 86px; --r: -2deg; --mx: -12px; --my: -18px; --depth: 90px; --dur: 9s; }
+.doc-g { left: 39%; bottom: -2%; color: var(--cl-blue); --w: 138px; --h: 92px; --r: 4deg; --mx: 20px; --my: 12px; --depth: 120px; --dur: 12s; }
+.doc-h { right: 18%; bottom: 29%; color: var(--cl-accent); --w: 98px; --h: 128px; --r: -14deg; --mx: -16px; --my: 22px; --depth: -70px; --dur: 10s; opacity: 0.72; }
+@keyframes cl-drift { from { translate: 0 -8px; } to { translate: 0 10px; } }
+.cl-signal {
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--cl-line);
+  border-radius: 999px;
+  background: var(--cl-panel);
+  color: var(--cl-muted);
+  padding: 6px 9px;
+  font: 800 10px var(--sc-font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: 0 10px 32px rgba(0,0,0,.12);
+  transform: translate3d(calc(var(--px, 0) * var(--mx, 0px)), calc(var(--py, 0) * var(--my, 0px)), 0);
+}
+.signal-a { right: 11%; top: 28%; --mx: -18px; --my: 12px; }
+.signal-b { left: 14%; top: 43%; --mx: 20px; --my: -12px; }
+.signal-c { right: 25%; bottom: 18%; --mx: 14px; --my: 18px; }
+.cl-signal::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--cl-accent); box-shadow: 0 0 0 5px var(--cl-accent-soft); }
+.cl-protagonist {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: min(360px, 78vw);
+  transform: translate(-50%, -50%) rotateX(8deg) rotateY(calc(var(--px, 0) * -8deg));
+  border: 1px solid var(--cl-line-strong);
+  border-radius: 10px;
+  background: var(--cl-panel-strong);
+  box-shadow: var(--cl-shadow);
+  overflow: hidden;
+}
+.cl-doc-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px; border-bottom: 1px solid var(--cl-line); }
+.cl-file-name { min-width: 0; }
+.cl-file-name b { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 14px; }
+.cl-file-name span, .cl-meta-label { color: var(--cl-muted); font: 750 10px var(--sc-font-mono); text-transform: uppercase; letter-spacing: 0.1em; }
+.cl-file-badge { border: 1px solid var(--cl-accent); color: var(--cl-accent); border-radius: 6px; padding: 5px 7px; font: 850 11px var(--sc-font-mono); }
+.cl-doc-body { padding: 18px; }
+.cl-lines { display: grid; gap: 9px; margin-bottom: 18px; }
+.cl-lines span { height: 7px; border-radius: 99px; background: color-mix(in oklab, var(--cl-ink) 16%, transparent); }
+.cl-lines span:nth-child(2) { width: 76%; }
+.cl-lines span:nth-child(3) { width: 56%; }
+.cl-meta-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.cl-meta { border: 1px solid var(--cl-line); border-radius: 7px; padding: 10px; background: color-mix(in oklab, var(--cl-panel) 76%, transparent); }
+.cl-meta strong { display: block; margin-top: 4px; font: 850 18px var(--sc-font-display); color: var(--cl-ink); }
+.cl-cost-strip { margin-top: 14px; border-radius: 8px; background: var(--cl-accent); color: #fff; padding: 14px; display: flex; align-items: end; justify-content: space-between; }
+.cl-cost-strip strong { font-size: 30px; line-height: 1; }
+.cl-scroll-hint { position: absolute; left: 50%; bottom: 22px; translate: -50% 0; color: var(--cl-muted); display: grid; place-items: center; gap: 6px; font: 700 11px var(--sc-font-mono); letter-spacing: 0.1em; text-transform: uppercase; }
+.cl-pinned { position: relative; }
+.cl-stage-content { min-height: 100svh; display: grid; place-items: center; padding: 82px clamp(1rem, 4vw, 4rem) 42px; overflow: hidden; box-sizing: border-box; }
+.cl-stage-inner { width: min(1180px, 100%); display: grid; grid-template-columns: 0.86fr 1.14fr; gap: clamp(2rem, 6vw, 5rem); align-items: center; }
+.cl-stage-copy { z-index: 3; }
+.cl-stage-copy h2 { margin: 12px 0 0; font-size: clamp(2.4rem, 5vw, 5.8rem); line-height: 0.95; letter-spacing: 0; }
+.cl-stage-copy p { color: var(--cl-muted); max-width: 520px; line-height: 1.55; }
+.cl-problem-visual { position: relative; min-height: 520px; }
+.cl-question-stack { position: absolute; inset: 8% auto auto 0; display: grid; gap: 14px; width: min(360px, 88vw); z-index: 3; }
+.cl-question { border-left: 2px solid var(--cl-line-strong); padding: 14px 0 14px 18px; color: var(--cl-muted); font-size: clamp(1.25rem, 2.8vw, 2.6rem); line-height: 1.05; font-weight: 800; background: linear-gradient(90deg, color-mix(in oklab, var(--cl-bg) 92%, transparent), transparent); }
+.cl-problem-sheet {
+  position: absolute;
+  right: 7%;
+  top: 11%;
+  width: min(330px, 72vw);
+  min-height: 420px;
+  border: 1px solid var(--cl-line-strong);
+  border-radius: 9px;
+  background: var(--cl-panel-strong);
+  box-shadow: var(--cl-shadow);
+  transform: rotate(calc(-5deg + var(--sc-p, 0) * 7deg)) translateY(calc((0.5 - var(--sc-p, 0)) * 42px));
+}
+.cl-paper-stack { position: absolute; right: 0; bottom: 5%; width: 210px; height: 150px; transform: translateX(calc(var(--sc-p, 0) * -34px)); }
+.cl-paper-stack span { position: absolute; inset: auto 0 0; height: 98px; border: 1px solid var(--cl-line); border-radius: 7px; background: var(--cl-panel); box-shadow: 0 10px 26px rgba(0,0,0,.08); transform: translateY(calc(var(--i) * -16px)) rotate(calc(var(--i) * -1deg)); }
+.cl-receipt { position: absolute; left: 12%; bottom: 9%; width: 210px; border: 1px dashed var(--cl-line-strong); border-radius: 7px; background: var(--cl-panel); padding: 16px; font-family: var(--sc-font-mono); transform: rotate(-4deg); }
+.cl-receipt div { display: flex; justify-content: space-between; gap: 14px; padding: 7px 0; border-bottom: 1px solid var(--cl-line); color: var(--cl-muted); font-size: 11px; }
+.cl-receipt strong { color: var(--cl-accent); font-size: 24px; }
+.cl-settle { margin-top: 26px; display: inline-flex; align-items: center; gap: 9px; color: var(--cl-ink); font-weight: 800; }
+.cl-solution-field { position: relative; min-height: 470px; display: grid; place-items: center; }
+.cl-capability-ring { position: relative; width: min(540px, 92vw); aspect-ratio: 1; border: 1px solid var(--cl-line); border-radius: 50%; }
+.cl-capability-ring::before, .cl-capability-ring::after { content: ""; position: absolute; inset: 13%; border: 1px solid var(--cl-line); border-radius: 50%; }
+.cl-capability-ring::after { inset: 29%; border-color: var(--cl-line-strong); }
+.cl-core-doc { position: absolute; inset: 50% auto auto 50%; translate: -50% -50%; width: 210px; border: 1px solid var(--cl-line-strong); border-radius: 9px; background: var(--cl-panel-strong); box-shadow: var(--cl-shadow); padding: 18px; z-index: 2; }
+.cl-core-doc strong { display: block; font-size: 24px; margin-top: 10px; }
+.cl-node { position: absolute; display: flex; align-items: center; gap: 8px; border: 1px solid var(--cl-line); border-radius: 7px; background: var(--cl-panel-strong); padding: 10px 12px; font: 800 12px var(--sc-font-mono); color: var(--cl-ink); box-shadow: 0 12px 36px rgba(0,0,0,.1); }
+.node-1 { left: 50%; top: -3%; translate: -50% 0; }
+.node-2 { right: -6%; top: 28%; }
+.node-3 { right: 6%; bottom: 10%; }
+.node-4 { left: 5%; bottom: 10%; }
+.node-5 { left: -7%; top: 28%; }
+.cl-capability-list { display: grid; gap: 14px; margin-top: 30px; }
+.cl-capability-list div { border-top: 1px solid var(--cl-line); padding-top: 14px; display: grid; grid-template-columns: 150px 1fr; gap: 18px; }
+.cl-capability-list b { color: var(--cl-ink); }
+.cl-capability-list span { color: var(--cl-muted); }
+.cl-pipeline { display: grid; gap: 0; margin-top: 54px; border-top: 1px solid var(--cl-line); border-bottom: 1px solid var(--cl-line); }
+.cl-pipe-step { display: grid; grid-template-columns: 92px 1fr minmax(220px, 0.58fr); gap: 24px; align-items: center; padding: clamp(1rem, 3vw, 1.8rem) 0; border-top: 1px solid var(--cl-line); }
+.cl-pipe-step:first-child { border-top: 0; }
+.cl-pipe-step em { color: var(--cl-accent); font: normal 850 13px var(--sc-font-mono); }
+.cl-pipe-step h3 { margin: 0; font-size: clamp(1.5rem, 3vw, 3rem); letter-spacing: 0; }
+.cl-pipe-step p { margin: 0; color: var(--cl-muted); line-height: 1.5; }
+.cl-pipe-chip { justify-self: end; border: 1px solid var(--cl-line); background: var(--cl-panel); border-radius: 7px; padding: 10px 12px; color: var(--cl-muted); font: 750 12px var(--sc-font-mono); }
+.cl-print-peak { min-height: 100svh; display: grid; place-items: center; padding: 76px clamp(1rem, 4vw, 4rem); overflow: hidden; }
+.cl-print-peak::before { content: ""; position: absolute; inset: 10% 6%; background: radial-gradient(circle at 50% 50%, var(--cl-accent-soft), transparent 64%); opacity: calc(0.35 + var(--sc-p, 0) * 0.6); }
+.cl-print-grid { position: relative; width: min(1120px, 100%); display: grid; grid-template-columns: 0.9fr 1.1fr; gap: clamp(2rem, 7vw, 5rem); align-items: center; }
+.cl-equation { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.cl-eq-box { min-height: 152px; border: 1px solid var(--cl-line); border-radius: 8px; background: var(--cl-panel); padding: 18px; display: grid; align-content: end; transform: translateY(calc((1 - var(--sc-p, 0)) * 18px)); }
+.cl-eq-box small { color: var(--cl-muted); font: 800 11px var(--sc-font-mono); letter-spacing: 0.08em; text-transform: uppercase; }
+.cl-eq-box strong { display: block; margin-top: 8px; font-size: clamp(2.4rem, 6vw, 5rem); line-height: 0.9; color: var(--cl-ink); }
+.cl-eq-box.cl-total { grid-column: 1 / -1; min-height: 190px; border-color: var(--cl-accent); background: linear-gradient(135deg, var(--cl-accent-soft), var(--cl-panel-strong)); }
+.cl-eq-box.cl-total strong { color: var(--cl-accent); font-size: clamp(4rem, 10vw, 9rem); }
+.cl-sheet-visual { position: relative; height: min(430px, 62vw); perspective: 1200px; }
+.cl-sheet-visual span { position: absolute; left: 50%; top: 50%; width: 210px; height: 288px; border: 1px solid var(--cl-line-strong); border-radius: 8px; background: var(--cl-panel-strong); box-shadow: var(--cl-shadow); transform: translate(-50%, -50%) rotate(calc((var(--i) - 3) * 7deg * var(--sc-p, 0))) translateX(calc((var(--i) - 3) * 36px * var(--sc-p, 0))) translateY(calc((var(--i) - 3) * -10px * var(--sc-p, 0))); padding: 16px; display: flex; flex-direction: column; gap: 8px; overflow: hidden; z-index: calc(10 - var(--i, 0)); opacity: calc(0.4 + 0.6 * var(--sc-p, 0)); }
+.cl-sheet-visual span:nth-child(odd) { background: color-mix(in oklab, var(--cl-panel-strong) 80%, var(--cl-accent-soft)); }
+.cl-sheet-head { display: flex; align-items: center; justify-content: space-between; font: 850 11px var(--sc-font-mono); color: var(--cl-ink); letter-spacing: 0.12em; text-transform: uppercase; border-bottom: 1px solid var(--cl-line-strong); padding-bottom: 8px; }
+.cl-sheet-head b { color: var(--cl-accent); font-weight: 850; }
+.cl-sheet-line { height: 6px; border-radius: 99px; background: color-mix(in oklab, var(--cl-ink) 52%, transparent); }
+.cl-sheet-line.short { width: 60%; }
+.cl-sheet-line.tiny { width: 38%; }
+.cl-sheet-line.accent { background: var(--cl-accent); opacity: 0.95; width: 70%; height: 6px; }
+.cl-sheet-block { height: 30px; border: 1px solid var(--cl-line-strong); border-radius: 5px; background: linear-gradient(135deg, color-mix(in oklab, var(--cl-ink) 32%, transparent), color-mix(in oklab, var(--cl-accent) 22%, transparent) 60%, transparent); margin-top: 4px; }
+.cl-sheet-foot { margin-top: auto; padding-top: 8px; border-top: 1px solid var(--cl-line); display: flex; align-items: center; justify-content: space-between; font: 800 9px var(--sc-font-mono); color: var(--cl-ink); letter-spacing: 0.12em; text-transform: uppercase; }
+.cl-action { display: grid; grid-template-columns: 1fr 0.9fr; gap: clamp(2rem, 7vw, 5rem); align-items: center; }
+.cl-action-rail { position: relative; min-height: 430px; }
+.cl-action-card { position: absolute; border: 1px solid var(--cl-line); background: var(--cl-panel-strong); border-radius: 8px; padding: 14px; box-shadow: var(--cl-shadow); width: min(270px, 72vw); }
+.cl-action-card h3 { margin: 10px 0 4px; font-size: 20px; }
+.cl-action-card p { margin: 0; color: var(--cl-muted); font-size: 13px; line-height: 1.45; }
+.card-upload { left: 4%; top: 0; }
+.card-analysis { right: 4%; top: 16%; }
+.card-library { left: 0; bottom: 18%; }
+.card-share { right: 2%; bottom: 0; }
+.cl-community-panel { margin-top: 46px; display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: stretch; }
+.cl-message { border: 1px solid var(--cl-line); background: var(--cl-panel); border-radius: 8px; padding: 18px; }
+.cl-message small { color: var(--cl-muted); font: 800 11px var(--sc-font-mono); text-transform: uppercase; letter-spacing: 0.1em; }
+.cl-message p { margin: 10px 0 0; font-size: clamp(1.3rem, 2.8vw, 2.4rem); line-height: 1.08; font-weight: 800; color: var(--cl-ink); }
+.cl-final { min-height: 100svh; display: grid; place-items: center; padding: 76px clamp(1rem, 4vw, 4rem) 32px; text-align: center; }
+.cl-final-card { width: min(620px, 100%); margin: 0 auto 38px; border: 1px solid var(--cl-line-strong); border-radius: 10px; background: var(--cl-panel-strong); box-shadow: var(--cl-shadow); padding: clamp(1rem, 4vw, 2rem); text-align: left; }
+.cl-final-card .cl-meta-grid { grid-template-columns: repeat(4, 1fr); }
+.cl-final h2 { margin: 0; font-size: clamp(2.7rem, 7vw, 7rem); line-height: 0.92; letter-spacing: 0; }
+.cl-final p { margin: 20px auto 0; max-width: 620px; color: var(--cl-muted); }
+.cl-footer { border-top: 1px solid var(--cl-line); margin-top: 70px; padding-top: 24px; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; color: var(--cl-muted); font: 700 12px var(--sc-font-mono); }
+@media (max-width: 920px) {
+  .cl-nav { inset: 10px 10px auto; }
+  .cl-nav-links, .cl-nav-actions .cl-link, .cl-nav-actions .cl-button:not(.cl-button--primary) { display: none; }
+  .cl-menu-button { display: inline-grid; place-items: center; }
+  .cl-mobile-menu { display: grid; gap: 8px; position: fixed; z-index: 90; inset: 66px 10px auto; border: 1px solid var(--cl-line); background: var(--cl-panel-strong); backdrop-filter: blur(18px); border-radius: 8px; padding: 12px; box-shadow: var(--cl-shadow); }
+  .cl-mobile-menu a, .cl-mobile-menu button { justify-content: flex-start; }
+  .cl-hero { padding-top: 92px; align-items: start; }
+  .cl-hero-grid, .cl-stage-inner, .cl-print-grid, .cl-action { grid-template-columns: 1fr; }
+  .cl-hero-grid { gap: 1.6rem; }
+  .cl-document-space { min-height: 360px; }
+  .doc-b, .doc-c, .doc-d, .doc-e, .doc-f, .doc-g, .doc-h { display: none; }
+  .doc-a, .doc-b { display: block; transform: translate3d(0,0,0) translate3d(calc(var(--px, 0) * var(--mx, 0px)), calc(var(--py, 0) * var(--my, 0px)), var(--depth, 0px)) rotateZ(var(--r)) translate3d(var(--repel-x, 0px), var(--repel-y, 0px), 0); scale: 0.78; opacity: 0.72; }
+  .cl-protagonist { width: min(312px, 82vw); }
+  .cl-stage-content { min-height: 100svh; align-items: start; padding-top: 86px; }
+  .cl-problem-visual { min-height: 420px; }
+  .cl-question-stack { position: relative; width: 100%; inset: auto; }
+  .cl-question { font-size: clamp(1.25rem, 7vw, 2.3rem); background: transparent; }
+  .cl-problem-sheet { right: 0; top: 42%; width: min(280px, 66vw); min-height: 310px; opacity: 0.78; }
+  .cl-receipt { left: 0; bottom: 2%; scale: 0.86; transform-origin: left bottom; }
+  .cl-capability-list div, .cl-pipe-step { grid-template-columns: 1fr; gap: 8px; }
+  .cl-pipe-chip { justify-self: start; }
+  .cl-equation { grid-template-columns: 1fr; }
+  .cl-sheet-visual { height: 330px; order: -1; }
+  .cl-sheet-visual span { width: 132px; height: 188px; }
+  .cl-action-rail { min-height: auto; }
+  .cl-action-card { position: relative; inset: auto; width: 100%; margin-bottom: 12px; }
+  .cl-community-panel { grid-template-columns: 1fr; }
+  .cl-final-card .cl-meta-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 560px) {
+  .cl-title, .cl-hero-title, .cl-stage-copy h2, .cl-final h2 { letter-spacing: 0; }
+  .cl-button { width: 100%; }
+  .cl-nav-actions .cl-button--primary { display: none; }
+  .cl-hero-actions { width: 100%; }
+  .cl-hero-title { font-size: clamp(2.65rem, 16vw, 4.4rem); }
+  .cl-hero-lede { margin-top: 16px; }
+  .cl-document-space { min-height: 300px; }
+  .cl-document-space::before { inset: 20% 0 12%; }
+  .doc-a, .doc-b { display: none; }
+  .cl-signal { display: none; }
+  .cl-format-row { max-width: 270px; }
+  .cl-protagonist { font-size: 13px; }
+  .cl-meta-grid { grid-template-columns: 1fr 1fr; }
+  .cl-capability-ring { scale: 0.84; margin: -34px auto; }
+  .cl-node { font-size: 10px; padding: 8px; }
+  .node-2 { right: -9%; }
+  .node-5 { left: -10%; }
+  .cl-section { padding-inline: 1rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .costly-landing *, .costly-landing *::before, .costly-landing *::after {
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+  .cl-orbit, .cl-float-doc, .cl-protagonist, .cl-problem-sheet, .cl-eq-box { transform: none !important; }
 }
 `;
 
 function mountSc(root: HTMLElement) {
-  if (typeof window !== "undefined" && (window as any).ScrollCraft) {
-    (window as any).ScrollCraft.mount(root);
+  if (typeof window !== "undefined" && window.ScrollCraft) {
+    window.ScrollCraft.mount(root, { lerp: 0.16 });
   }
 }
 
-/* -----------------------------------------------------------------------
-   Brand Wordmark Component: COSTlY
-   ----------------------------------------------------------------------- */
-function CostlyLogo({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
-  const textSize = size === "lg" ? "text-2xl" : size === "sm" ? "text-lg" : "text-xl";
-  const iconSize = size === "lg" ? "h-8 w-8" : size === "sm" ? "h-6 w-6" : "h-7 w-7";
+function usePointerVars(ref: React.RefObject<HTMLElement | null>) {
+  useEffect(() => {
+    const root = ref.current;
+    if (!root) return;
+    const fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!fine || reduce) return;
 
+    let raf = 0;
+    let tx = 0;
+    let ty = 0;
+    let x = 0;
+    let y = 0;
+    const onMove = (event: MouseEvent) => {
+      tx = (event.clientX / window.innerWidth - 0.5) * 2;
+      ty = (event.clientY / window.innerHeight - 0.5) * 2;
+    };
+    const loop = () => {
+      x += (tx - x) * 0.08;
+      y += (ty - y) * 0.08;
+      root.style.setProperty("--px", x.toFixed(3));
+      root.style.setProperty("--py", y.toFixed(3));
+      raf = requestAnimationFrame(loop);
+    };
+    window.addEventListener("pointermove", onMove, { passive: true });
+    raf = requestAnimationFrame(loop);
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      cancelAnimationFrame(raf);
+    };
+  }, [ref]);
+}
+
+function CostlyLogo() {
   return (
-    <div className={`flex items-center gap-2 font-display font-extrabold tracking-tight ${textSize} text-white`}>
-      <div className={`${iconSize} rounded-lg bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-white shadow-lg shadow-orange-500/30`}>
-        <Calculator className="h-4 w-4" />
-      </div>
-      <span>
-        COST<span className="text-orange-500">lY</span>
+    <Link to="/" className="cl-brand" aria-label="COSTTY home">
+      <span className="cl-brand-mark">
+        <Calculator size={16} />
       </span>
-    </div>
+      <span>COSTTY</span>
+    </Link>
   );
 }
 
-/* -----------------------------------------------------------------------
-   Custom Ring Cursor Component
-   ----------------------------------------------------------------------- */
-function CustomRingCursor() {
-  const ringRef = useRef<HTMLDivElement>(null);
-  const dotRef = useRef<HTMLDivElement>(null);
-  const mouse = useRef({ x: -100, y: -100 });
-  const pos = useRef({ x: -100, y: -100 });
-  const [hovered, setHovered] = useState(false);
-
-  useEffect(() => {
-    const onMouseMove = (e: MouseEvent) => {
-      mouse.current = { x: e.clientX, y: e.clientY };
-      if (dotRef.current) {
-        dotRef.current.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0)`;
-      }
-      const target = e.target as HTMLElement | null;
-      if (target && target.closest("a, button, input, select, .interactive-card")) {
-        setHovered(true);
-      } else {
-        setHovered(false);
-      }
-    };
-
-    window.addEventListener("mousemove", onMouseMove, { passive: true });
-
-    let raf: number;
-    const loop = () => {
-      pos.current.x += (mouse.current.x - pos.current.x) * 0.15;
-      pos.current.y += (mouse.current.y - pos.current.y) * 0.15;
-      if (ringRef.current) {
-        ringRef.current.style.transform = `translate3d(${pos.current.x - 18}px, ${pos.current.y - 18}px, 0) scale(${
-          hovered ? 1.6 : 1
-        })`;
-      }
-      raf = requestAnimationFrame(loop);
-    };
-    raf = requestAnimationFrame(loop);
-
-    return () => {
-      window.removeEventListener("mousemove", onMouseMove);
-      cancelAnimationFrame(raf);
-    };
-  }, [hovered]);
-
+function Navigation() {
+  const [open, setOpen] = useState(false);
+  const close = () => setOpen(false);
   return (
     <>
-      <div
-        ref={ringRef}
-        className={`pointer-events-none fixed top-0 left-0 z-50 h-9 w-9 rounded-full border border-amber-500/70 transition-transform ease-out ${
-          hovered ? "bg-amber-500/10 border-amber-400" : ""
-        }`}
-        style={{ willChange: "transform" }}
-      />
-      <div
-        ref={dotRef}
-        className="pointer-events-none fixed top-0 left-0 z-50 -ml-1 -mt-1 h-2 w-2 rounded-full bg-amber-400"
-        style={{ willChange: "transform" }}
-      />
+      <header className="cl-nav">
+        <CostlyLogo />
+        <nav className="cl-nav-links" aria-label="Landing page">
+          <a href="#intelligence">Intelligence</a>
+          <a href="#cost-engine">Cost Engine</a>
+          <a href="#platform">Platform</a>
+          <a href="#community">Community</a>
+        </nav>
+        <div className="cl-nav-actions">
+          <ThemeToggle compact />
+          <Link className="cl-link" to="/login">Sign In</Link>
+          <Link className="cl-button cl-button--primary" to="/register">
+            Get Started <ArrowRight size={15} />
+          </Link>
+          <button className="cl-menu-button" onClick={() => setOpen((v) => !v)} aria-label="Toggle menu">
+            {open ? <X size={20} /> : <Menu size={20} />}
+          </button>
+        </div>
+      </header>
+      {open ? (
+        <nav className="cl-mobile-menu" aria-label="Mobile landing page">
+          <a onClick={close} className="cl-link" href="#intelligence">Intelligence</a>
+          <a onClick={close} className="cl-link" href="#cost-engine">Cost Engine</a>
+          <a onClick={close} className="cl-link" href="#platform">Platform</a>
+          <a onClick={close} className="cl-link" href="#community">Community</a>
+          <Link onClick={close} className="cl-link" to="/login">Sign In</Link>
+          <Link onClick={close} className="cl-button cl-button--primary" to="/register">Get Started</Link>
+        </nav>
+      ) : null}
     </>
   );
 }
 
-/* -----------------------------------------------------------------------
-   3D BACKGROUND #1: File 3D Cursor-Reactive Canvas (Hero Section Only)
-   ----------------------------------------------------------------------- */
-function File3DCanvas() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const mouseRef = useRef({ x: 0.5, y: 0.5, targetX: 0.5, targetY: 0.5 });
+function FloatingDocument({
+  className,
+  label,
+  mouseX,
+  mouseY,
+}: {
+  className: string;
+  label: string;
+  mouseX: number;
+  mouseY: number;
+}) {
+  const elRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    const el = elRef.current;
+    if (!el) return;
 
-    let width = (canvas.width = canvas.parentElement?.clientWidth || window.innerWidth);
-    let height = (canvas.height = canvas.parentElement?.clientHeight || window.innerHeight);
-
-    const onResize = () => {
-      if (!canvas || !canvas.parentElement) return;
-      width = canvas.width = canvas.parentElement.clientWidth;
-      height = canvas.height = canvas.parentElement.clientHeight;
-    };
-    window.addEventListener("resize", onResize);
-
-    const onMouseMove = (e: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect();
-      mouseRef.current.targetX = (e.clientX - rect.left) / width;
-      mouseRef.current.targetY = (e.clientY - rect.top) / height;
-    };
-    window.addEventListener("mousemove", onMouseMove);
-
-    // Create 3D Floating File Nodes
-    const nodesCount = 50;
-    const nodes: {
-      x: number;
-      y: number;
-      z: number;
-      vx: number;
-      vy: number;
-      vz: number;
-      size: number;
-      type: string;
-    }[] = [];
-
-    const types = ["PDF", "DOCX", "XLSX", "PPTX", "FILE"];
-
-    for (let i = 0; i < nodesCount; i++) {
-      nodes.push({
-        x: (Math.random() - 0.5) * width * 1.5,
-        y: (Math.random() - 0.5) * height * 1.5,
-        z: Math.random() * 700 + 100,
-        vx: (Math.random() - 0.5) * 0.5,
-        vy: (Math.random() - 0.5) * 0.5,
-        vz: (Math.random() - 0.5) * 0.5,
-        size: Math.random() * 4 + 3,
-        type: types[i % types.length],
-      });
+    if (mouseX < -100) {
+      el.style.setProperty("--repel-x", "0px");
+      el.style.setProperty("--repel-y", "0px");
+      return;
     }
 
-    let animationFrameId: number;
-
-    const render = () => {
-      mouseRef.current.x += (mouseRef.current.targetX - mouseRef.current.x) * 0.06;
-      mouseRef.current.y += (mouseRef.current.targetY - mouseRef.current.y) * 0.06;
-
-      ctx.clearRect(0, 0, width, height);
-
-      const rotY = (mouseRef.current.x - 0.5) * 1.0;
-      const rotX = (mouseRef.current.y - 0.5) * 1.0;
-
-      const fov = 400;
-      const cx = width / 2;
-      const cy = height / 2;
-
-      const projected: { x: number; y: number; scale: number; type: string }[] = [];
-
-      nodes.forEach((node) => {
-        node.x += node.vx;
-        node.y += node.vy;
-        node.z += node.vz;
-
-        if (Math.abs(node.x) > width) node.vx *= -1;
-        if (Math.abs(node.y) > height) node.vy *= -1;
-        if (node.z < 50 || node.z > 850) node.vz *= -1;
-
-        const cosY = Math.cos(rotY);
-        const sinY = Math.sin(rotY);
-        const cosX = Math.cos(rotX);
-        const sinX = Math.sin(rotX);
-
-        let x1 = node.x * cosY - node.z * sinY;
-        let z1 = node.z * cosY + node.x * sinY;
-        let y1 = node.y * cosX - z1 * sinX;
-        let z2 = z1 * cosX + node.y * sinX;
-
-        const scale = Math.max(0.1, fov / Math.max(1, fov + z2));
-        const px = cx + x1 * scale;
-        const py = cy + y1 * scale;
-        const radius = Math.max(0.1, node.size * scale);
-
-        projected.push({ x: px, y: py, scale, type: node.type });
-
-        if (px >= 0 && px <= width && py >= 0 && py <= height) {
-          ctx.beginPath();
-          ctx.arc(px, py, radius, 0, Math.PI * 2);
-          ctx.fillStyle = node.type === "PDF" ? "rgba(249, 115, 22, 0.9)" : "rgba(148, 163, 184, 0.4)";
-          ctx.fill();
-        }
-      });
-
-      for (let i = 0; i < projected.length; i++) {
-        for (let j = i + 1; j < projected.length; j++) {
-          const dx = projected[i].x - projected[j].x;
-          const dy = projected[i].y - projected[j].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 140) {
-            ctx.beginPath();
-            ctx.moveTo(projected[i].x, projected[i].y);
-            ctx.lineTo(projected[j].x, projected[j].y);
-            ctx.strokeStyle = `rgba(249, 115, 22, ${0.15 * (1 - dist / 140)})`;
-            ctx.lineWidth = 0.8;
-            ctx.stroke();
-          }
-        }
-      }
-
-      animationFrameId = requestAnimationFrame(render);
-    };
-
-    render();
-
-    return () => {
-      window.removeEventListener("resize", onResize);
-      window.removeEventListener("mousemove", onMouseMove);
-      cancelAnimationFrame(animationFrameId);
-    };
-  }, []);
-
-  return <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none z-0 opacity-80" />;
-}
-
-/* -----------------------------------------------------------------------
-   3D BACKGROUND #2: Full-Page Cost & Currency Floating Canvas
-   ----------------------------------------------------------------------- */
-function Cost3DCanvas() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    let width = (canvas.width = window.innerWidth);
-    let height = (canvas.height = window.innerHeight);
-
-    const onResize = () => {
-      if (!canvas) return;
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
-    };
-    window.addEventListener("resize", onResize);
-
-    const symbols = ["₹", "$", "€", "%", "0.00", "COST", "API"];
-    const particlesCount = 40;
-    const particles: {
-      x: number;
-      y: number;
-      z: number;
-      vy: number;
-      vx: number;
-      symbol: string;
-      alpha: number;
-    }[] = [];
-
-    for (let i = 0; i < particlesCount; i++) {
-      particles.push({
-        x: Math.random() * width,
-        y: Math.random() * height,
-        z: Math.random() * 400 + 100,
-        vy: -0.3 - Math.random() * 0.4,
-        vx: (Math.random() - 0.5) * 0.3,
-        symbol: symbols[i % symbols.length],
-        alpha: Math.random() * 0.35 + 0.15,
-      });
-    }
-
-    let animationFrameId: number;
-
-    const render = () => {
-      ctx.clearRect(0, 0, width, height);
-
-      particles.forEach((p) => {
-        p.y += p.vy;
-        p.x += p.vx;
-
-        if (p.y < -50) {
-          p.y = height + 50;
-          p.x = Math.random() * width;
-        }
-        if (p.x < -50) p.x = width + 50;
-        if (p.x > width + 50) p.x = -50;
-
-        const scale = 300 / (300 + p.z);
-        const fontSize = Math.max(10, Math.round(18 * scale));
-
-        ctx.font = `600 ${fontSize}px IBM Plex Mono, monospace`;
-        ctx.fillStyle = p.symbol === "₹" ? `rgba(249, 115, 22, ${p.alpha})` : `rgba(148, 163, 184, ${p.alpha * 0.6})`;
-        ctx.fillText(p.symbol, p.x, p.y);
-      });
-
-      animationFrameId = requestAnimationFrame(render);
-    };
-
-    render();
-
-    return () => {
-      window.removeEventListener("resize", onResize);
-      cancelAnimationFrame(animationFrameId);
-    };
-  }, []);
-
-  return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-0 opacity-40" />;
-}
-
-/* -----------------------------------------------------------------------
-   Interactive Intake Demo Component (Hero)
-   ----------------------------------------------------------------------- */
-function InteractiveIntakeDemo() {
-  const [selectedDoc, setSelectedDoc] = useState<"pdf" | "docx" | "xlsx" | "pptx">("pdf");
-
-  const sampleDocs = {
-    pdf: {
-      name: "Q3_Financial_Audit_Report.pdf",
-      size: "4.8 MB",
-      pages: 142,
-      category: "PDF Document",
-      mime: "application/pdf",
-      bwSides: 284,
-      colorSides: 0,
-      estCost: formatPaise(284 * 250),
-      badgeColor: "border-orange-500/40 text-orange-400 bg-orange-500/10",
-      details: ["Searchable OCR text", "142 pages (Duplex)", "Extracts tables & metadata"],
-    },
-    docx: {
-      name: "Product_Specs_v2.docx",
-      size: "2.1 MB",
-      pages: 45,
-      category: "Microsoft Word",
-      mime: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      bwSides: 90,
-      colorSides: 0,
-      estCost: formatPaise(90 * 250),
-      badgeColor: "border-blue-500/40 text-blue-400 bg-blue-500/10",
-      details: ["Typography parsed", "90 printed sides", "Heading hierarchy extracted"],
-    },
-    xlsx: {
-      name: "Annual_Budget_2026.xlsx",
-      size: "6.4 MB",
-      pages: 18,
-      category: "Microsoft Excel",
-      mime: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      bwSides: 0,
-      colorSides: 36,
-      estCost: formatPaise(36 * 800),
-      badgeColor: "border-emerald-500/40 text-emerald-400 bg-emerald-500/10",
-      details: ["3 Worksheets detected", "Color grid enabled", "Print area formatted"],
-    },
-    pptx: {
-      name: "Investor_Deck_Final.pptx",
-      size: "12.3 MB",
-      pages: 28,
-      category: "Microsoft PowerPoint",
-      mime: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-      bwSides: 0,
-      colorSides: 56,
-      estCost: formatPaise(56 * 800),
-      badgeColor: "border-purple-500/40 text-purple-400 bg-purple-500/10",
-      details: ["28 High-res slides", "Full Color output", "Aspect ratio 16:9"],
-    },
-  };
-
-  const current = sampleDocs[selectedDoc];
+    const rafId = requestAnimationFrame(() => {
+      const rect = el.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const dx = mouseX - cx;
+      const dy = mouseY - cy;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const maxDist = 240;
+      const strength = Math.max(0, 1 - dist / maxDist);
+      el.style.setProperty("--repel-x", `${-dx * strength * 0.4}px`);
+      el.style.setProperty("--repel-y", `${-dy * strength * 0.4}px`);
+    });
+    return () => cancelAnimationFrame(rafId);
+  }, [mouseX, mouseY]);
 
   return (
-    <div className="interactive-card rounded-2xl border border-white/10 bg-slate-900/80 backdrop-blur-xl p-6 shadow-2xl">
-      <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-4">
-        <div className="flex items-center gap-2">
-          <Sparkles className="h-4 w-4 text-orange-400" />
-          <span className="font-mono text-xs uppercase tracking-wider text-slate-300">Live Intake Inspector</span>
+    <div ref={elRef} className={`cl-float-doc ${className}`} aria-hidden="true">
+      <small>{label}</small>
+      <i />
+      <i />
+      <i />
+    </div>
+  );
+}
+
+function ProtagonistDocument({ compact = false }: { compact?: boolean }) {
+  const sample = calculateEstimate({ pageCount: 142, copies: 1, colorMode: "bw", sidedness: "duplex" });
+  return (
+    <div className="cl-protagonist" data-sc-tilt="4">
+      <div className="cl-doc-head">
+        <div className="cl-file-name">
+          <span>{compact ? "Document" : "Unknown file resolved"}</span>
+          <b>semester_notes.pdf</b>
         </div>
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-mono text-emerald-400">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          API Ready
-        </span>
+        <span className="cl-file-badge">PDF</span>
       </div>
-
-      <div className="grid grid-cols-4 gap-2 mb-6">
-        {(["pdf", "docx", "xlsx", "pptx"] as const).map((type) => (
-          <button
-            key={type}
-            onClick={() => setSelectedDoc(type)}
-            className={`flex flex-col items-center gap-1 rounded-lg border py-2 text-xs font-mono uppercase transition ${
-              selectedDoc === type
-                ? "border-orange-500 bg-orange-500/15 text-orange-300 shadow-sm"
-                : "border-white/5 bg-slate-800/50 text-slate-400 hover:border-white/20 hover:text-slate-200"
-            }`}
-          >
-            <span className="font-bold">{type}</span>
-          </button>
-        ))}
+      <div className="cl-doc-body">
+        <div className="cl-lines">
+          <span />
+          <span />
+          <span />
+        </div>
+        <div className="cl-meta-grid">
+          <div className="cl-meta">
+            <span className="cl-meta-label">Pages</span>
+            <strong>142</strong>
+          </div>
+          <div className="cl-meta">
+            <span className="cl-meta-label">Mode</span>
+            <strong>B&amp;W</strong>
+          </div>
+          <div className="cl-meta">
+            <span className="cl-meta-label">Sides</span>
+            <strong>{sample.totalPrintedSides}</strong>
+          </div>
+          <div className="cl-meta">
+            <span className="cl-meta-label">Sheets</span>
+            <strong>{sample.totalPhysicalSheets}</strong>
+          </div>
+        </div>
+        <div className="cl-cost-strip">
+          <span className="cl-meta-label">Estimated cost</span>
+          <strong>{formatPaise(sample.totalPaise)}</strong>
+        </div>
       </div>
+    </div>
+  );
+}
 
-      <div className="space-y-4">
-        <div className="rounded-xl border border-white/10 bg-slate-950/60 p-4">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-3">
-              <div className={`rounded-lg border p-2.5 ${current.badgeColor}`}>
-                <FileText className="h-5 w-5" />
-              </div>
-              <div>
-                <h4 className="font-medium text-slate-100 text-sm">{current.name}</h4>
-                <p className="font-mono text-[11px] text-slate-400">{current.mime}</p>
-              </div>
-            </div>
-            <span className={`rounded-md border px-2 py-0.5 text-[10px] font-mono ${current.badgeColor}`}>
-              {current.category}
+function Hero() {
+  const [mouseX, setMouseX] = useState(-9999);
+  const [mouseY, setMouseY] = useState(-9999);
+
+  const docDefs = [
+    { cls: "doc-a", label: "PDF" },
+    { cls: "doc-b", label: "DOCX" },
+    { cls: "doc-c", label: "XLSX" },
+    { cls: "doc-d", label: "PPTX" },
+    { cls: "doc-e", label: "META" },
+  ];
+
+  return (
+    <section className="cl-hero" data-sc-act="flow" data-sc-drift="#10131c">
+      <div className="cl-hero-grid">
+        <div className="cl-hero-copy">
+          <p className="cl-kicker" data-sc-in>COSTTY document intelligence</p>
+          <h1 className="cl-hero-title" data-sc-in>
+            Know what you&apos;re printing <span>before</span> you print it.
+          </h1>
+          <p className="cl-hero-lede" data-sc-in>
+            A document enters as a file. COSTTY turns it into type, metadata, page count, print configuration, cost,
+            library context, and a shareable path forward.
+          </p>
+          <div className="cl-hero-actions" data-sc-in>
+            <Link className="cl-button cl-button--primary" to="/register">
+              Start Estimating <ArrowRight size={17} />
+            </Link>
+            <Link className="cl-button" to="/login">
+              Sign In
+            </Link>
+          </div>
+          <div className="cl-format-row" aria-label="Supported document formats" data-sc-in>
+            {["PDF", "DOCX", "XLSX", "PPTX"].map((format) => <span className="cl-format" key={format}>{format}</span>)}
+          </div>
+        </div>
+        <div
+          className="cl-document-space"
+          aria-hidden="true"
+          onMouseMove={(e) => { setMouseX(e.clientX); setMouseY(e.clientY); }}
+          onMouseLeave={() => { setMouseX(-9999); setMouseY(-9999); }}
+        >
+          <div className="cl-orbit">
+            {docDefs.map(({ cls, label }) => (
+              <FloatingDocument key={cls} className={cls} label={label} mouseX={mouseX} mouseY={mouseY} />
+            ))}
+          </div>
+          <ProtagonistDocument />
+        </div>
+      </div>
+      <div className="cl-scroll-hint">
+        <span>Scroll the document</span>
+        <ChevronDown size={16} />
+      </div>
+    </section>
+  );
+}
+
+function ProblemStory() {
+  return (
+    <section id="problem" className="cl-pinned" data-sc-act="pin" data-sc-span="3" data-sc-dwell="0.18">
+      <div className="sc-stage cl-stage-content">
+        <div className="cl-stage-inner">
+          <div className="cl-stage-copy">
+            <p className="cl-kicker" data-sc-cue="0.02 0.22">The problem</p>
+            <h2 data-sc-cue="0.05 0.48">A print job should not begin with uncertainty.</h2>
+            <p data-sc-cue="0.22 0.72">
+              Before the first page comes out, people are already guessing. Pages, copies, color mode, sidedness,
+              physical sheets, total price. Small unknowns become an expensive surprise.
+            </p>
+            <span className="cl-settle" data-sc-cue="0.72 0.95">
+              <CheckCircle2 size={18} /> There has to be a better way.
             </span>
           </div>
-
-          <div className="grid grid-cols-3 gap-3 mt-4 pt-3 border-t border-white/5 font-mono text-xs">
-            <div>
-              <span className="text-slate-500 block text-[10px]">FILE SIZE</span>
-              <span className="text-slate-200">{current.size}</span>
+          <div className="cl-problem-visual" aria-hidden="true">
+            <div className="cl-question-stack">
+              <div className="cl-question" data-sc-cue="0.06 0.22">How many pages?</div>
+              <div className="cl-question" data-sc-cue="0.22 0.4">Color or B&amp;W?</div>
+              <div className="cl-question" data-sc-cue="0.38 0.58">Simplex or duplex?</div>
+              <div className="cl-question" data-sc-cue="0.56 0.8">Is this the right price?</div>
             </div>
-            <div>
-              <span className="text-slate-500 block text-[10px]">PAGES</span>
-              <span className="text-slate-200">{current.pages} pages</span>
+            <div className="cl-problem-sheet">
+              <div className="cl-doc-head">
+                <div className="cl-file-name">
+                  <span>Unpriced document</span>
+                  <b>notes_final.pdf</b>
+                </div>
+                <span className="cl-file-badge">?</span>
+              </div>
+              <div className="cl-doc-body">
+                <div className="cl-lines"><span /><span /><span /></div>
+                <div className="cl-meta-grid">
+                  <div className="cl-meta"><span className="cl-meta-label">Pages</span><strong>?</strong></div>
+                  <div className="cl-meta"><span className="cl-meta-label">Cost</span><strong>?</strong></div>
+                </div>
+              </div>
             </div>
-            <div>
-              <span className="text-slate-500 block text-[10px]">ESTIMATED COST</span>
-              <span className="text-orange-400 font-bold">{current.estCost}</span>
+            <div className="cl-paper-stack">
+              {[0, 1, 2, 3].map((i) => <span key={i} style={{ "--i": i } as React.CSSProperties} />)}
+            </div>
+            <div className="cl-receipt">
+              <div><span>Pages</span><span>unknown</span></div>
+              <div><span>Rate</span><span>unclear</span></div>
+              <div><span>Sides</span><span>maybe</span></div>
+              <strong>₹ ?</strong>
             </div>
           </div>
         </div>
-
-        <ul className="space-y-2 text-xs font-mono text-slate-400">
-          {current.details.map((detail, idx) => (
-            <li key={idx} className="flex items-center gap-2">
-              <CheckCircle2 className="h-3.5 w-3.5 text-orange-400 flex-shrink-0" />
-              <span>{detail}</span>
-            </li>
-          ))}
-        </ul>
       </div>
-    </div>
+    </section>
   );
 }
 
-/* -----------------------------------------------------------------------
-   Storytelling Component for Section 2: Friction vs COSTlY Comparison
-   ----------------------------------------------------------------------- */
-function StorytellingProblemComparison() {
-  const [activeTab, setActiveTab] = useState<"old" | "costly">("costly");
-  const [userPages, setUserPages] = useState(150);
-
-  const oldCost = userPages * 5 * 100;
-  const costlyCost = userPages * 2 * 250;
-
+function WhatCostlyDoes() {
+  const capabilities = [
+    ["Document Intelligence", "Identify formats, infer metadata, count pages, and classify documents."],
+    ["Print Cost Engine", "Pages x copies x selected mode x rate per printed side."],
+    ["File Management", "Upload, organize, search, download, rename, and delete documents."],
+    ["File Sharing", "Share documents through permissioned links with expiration."],
+    ["Community", "Request files, offer relevant documents, and fulfill requests."],
+  ];
   return (
-    <div className="rounded-2xl border border-white/10 bg-slate-900/80 backdrop-blur-xl p-8 shadow-2xl space-y-8">
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-white/10 pb-6">
-        <div>
-          <span className="font-mono text-xs uppercase tracking-wider text-orange-400">Section 02 · Storytelling Friction Engine</span>
-          <h3 className="font-display font-bold text-2xl text-white">Traditional Print Counter vs COSTlY Engine</h3>
-        </div>
-        <div className="flex rounded-xl border border-white/10 bg-slate-950 p-1 font-mono text-xs">
-          <button
-            onClick={() => setActiveTab("old")}
-            className={`px-4 py-2 rounded-lg transition ${
-              activeTab === "old" ? "bg-red-500/20 text-red-400 border border-red-500/30 font-bold" : "text-slate-400"
-            }`}
-          >
-            Old Print Counter
-          </button>
-          <button
-            onClick={() => setActiveTab("costly")}
-            className={`px-4 py-2 rounded-lg transition ${
-              activeTab === "costly" ? "bg-orange-500 text-white font-bold" : "text-slate-400"
-            }`}
-          >
-            COSTlY REST API
-          </button>
-        </div>
-      </div>
-
-      {activeTab === "old" ? (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-mono text-xs">
-          <div className="rounded-xl border border-red-500/30 bg-red-500/5 p-5 space-y-2">
-            <AlertCircle className="h-5 w-5 text-red-400" />
-            <h4 className="font-bold text-slate-200 text-sm">Unpriced Counter Surprise</h4>
-            <p className="text-slate-400 text-xs">You submit files blind. The total price is revealed only when printing completes.</p>
+    <section id="intelligence" className="cl-section" data-sc-act="flow">
+      <div className="cl-wrap">
+        <p className="cl-kicker" data-sc-in>What COSTTY does</p>
+        <h2 className="cl-title" data-sc-in>The same document, now understood.</h2>
+        <p className="cl-subtitle" data-sc-in>
+          COSTTY is not a stack of separate tools. It is one path from upload to confidence: understand the file,
+          price the print, manage the document, share it, and discover what others can provide.
+        </p>
+        <div className="cl-stage-inner">
+          <div className="cl-solution-field" data-sc-in>
+            <div className="cl-capability-ring" aria-hidden="true">
+              <div className="cl-core-doc">
+                <FileText color="var(--cl-accent)" />
+                <strong>DOCUMENT</strong>
+                <span className="cl-meta-label">Intelligence begins here</span>
+              </div>
+              <span className="cl-node node-1"><Sparkles size={14} /> Identify</span>
+              <span className="cl-node node-2"><Calculator size={14} /> Calculate</span>
+              <span className="cl-node node-3"><FolderSearch size={14} /> Manage</span>
+              <span className="cl-node node-4"><Share2 size={14} /> Share</span>
+              <span className="cl-node node-5"><Users size={14} /> Discover</span>
+            </div>
           </div>
-          <div className="rounded-xl border border-red-500/30 bg-red-500/5 p-5 space-y-2">
-            <Clock className="h-5 w-5 text-red-400" />
-            <h4 className="font-bold text-slate-200 text-sm">3 Separate Manual Steps</h4>
-            <p className="text-slate-400 text-xs">Upload on email, verify in person, pay via separate apps with no history.</p>
-          </div>
-          <div className="rounded-xl border border-red-500/30 bg-red-500/5 p-5 space-y-2">
-            <TrendingDown className="h-5 w-5 text-red-400" />
-            <h4 className="font-bold text-slate-200 text-sm">Arbitrary Pricing Marks</h4>
-            <p className="text-slate-400 text-xs">Simplex/duplex billed at random rates with no itemized calculation receipt.</p>
-          </div>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-mono text-xs">
-          <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-5 space-y-2">
-            <CheckCircle2 className="h-5 w-5 text-emerald-400" />
-            <h4 className="font-bold text-slate-200 text-sm">Upfront Price Guarantee</h4>
-            <p className="text-slate-400 text-xs">REST API calculates itemized costs down to the paise before printing.</p>
-          </div>
-          <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-5 space-y-2">
-            <Zap className="h-5 w-5 text-emerald-400" />
-            <h4 className="font-bold text-slate-200 text-sm">Automated Document Intake</h4>
-            <p className="text-slate-400 text-xs">Identifies PDF, Word, Excel, PPTX, page counts, color ratios in milliseconds.</p>
-          </div>
-          <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-5 space-y-2">
-            <Lock className="h-5 w-5 text-emerald-400" />
-            <h4 className="font-bold text-slate-200 text-sm">Permanent History &amp; Share</h4>
-            <p className="text-slate-400 text-xs">Save estimates, generate share links with permission levels and expiry timers.</p>
-          </div>
-        </div>
-      )}
-
-      <div className="pt-6 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-6">
-        <div className="w-full md:w-1/2 space-y-2">
-          <div className="flex justify-between font-mono text-xs">
-            <span className="text-slate-400">Your Average Semester Pages</span>
-            <span className="text-orange-400 font-bold">{userPages} pages</span>
-          </div>
-          <input
-            type="range"
-            min="50"
-            max="500"
-            value={userPages}
-            onChange={(e) => setUserPages(Number(e.target.value))}
-            className="w-full accent-orange-500 cursor-pointer"
-          />
-        </div>
-
-        <div className="flex items-center gap-6 font-mono text-xs">
-          <div>
-            <span className="text-slate-500 block text-[10px]">UNPRICED SHOP</span>
-            <span className="text-red-400 font-bold text-lg">{formatPaise(oldCost)}</span>
-          </div>
-          <div className="text-orange-400 text-xl font-bold">→</div>
-          <div>
-            <span className="text-slate-500 block text-[10px]">COSTlY REST API</span>
-            <span className="text-emerald-400 font-bold text-lg">{formatPaise(costlyCost)}</span>
+          <div className="cl-capability-list" data-sc-stagger="70" data-sc-in>
+            {capabilities.map(([title, body]) => (
+              <div key={title}>
+                <b>{title}</b>
+                <span>{body}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }
 
-/* -----------------------------------------------------------------------
-   Storytelling Component for Section 3: Document Processing Pipeline
-   ----------------------------------------------------------------------- */
-function StorytellingPipelineInspector() {
-  const [activeStep, setActiveStep] = useState<number>(1);
-
+function PlatformPipeline() {
   const steps = [
-    {
-      num: "01",
-      title: "File Intake & MIME Verification",
-      icon: FileCode,
-      desc: "Validates binary header signatures for PDF, DOCX, XLSX, and PPTX formats, rejecting corrupt uploads.",
-      output: "MIME: application/pdf · Validation: PASSED · Size: 4.8MB",
-    },
-    {
-      num: "02",
-      title: "Layout & OCR Extraction",
-      icon: ScanSearch,
-      desc: "Parses text streams, extracts headings, counts vector elements, and detects embedded raster graphics.",
-      output: "Words: 34,200 · Headings: 18 · OCR Status: Searchable",
-    },
-    {
-      num: "03",
-      title: "Physical Sheet & Color Counter",
-      icon: Layers,
-      desc: "Calculates duplex vs. simplex physical sheet requirements and flags color vs black & white pages.",
-      output: "Physical Sheets: 71 (Duplex) · B&W Sides: 142 · Color: 0",
-    },
-    {
-      num: "04",
-      title: "Cost Calculation & API Payload",
-      icon: Terminal,
-      desc: "Applies pricing rules (₹2.50/side B&W) and returns structured JSON payload with HTTP 200 OK.",
-      output: "Calculated Cost: ₹355.00 · Currency: INR · Status: 200 OK",
-    },
+    ["01", "Upload", "PDF, DOCX, XLSX, and PPTX files enter the platform.", "file type"],
+    ["02", "Analyze", "COSTTY reads file size, extension, content type, and document information.", "metadata"],
+    ["03", "Classify", "The file is categorized so the library can stay searchable.", "category"],
+    ["04", "Calculate", "Print settings become printed sides, physical sheets, and total cost.", "estimate"],
+    ["05", "Manage", "Documents remain organized in folders with search and download.", "library"],
+    ["06", "Share", "Links can carry permissions and expiration.", "secure link"],
+    ["07", "Community", "Requests and offers help documents find the right person.", "fulfilled"],
   ];
-
   return (
-    <div className="rounded-2xl border border-white/10 bg-slate-900/90 backdrop-blur-xl p-8 shadow-2xl space-y-8">
-      <div className="text-center max-w-2xl mx-auto space-y-2">
-        <span className="font-mono text-xs uppercase tracking-widest text-orange-400">Section 03 · Storytelling Pipeline</span>
-        <h3 className="font-display font-bold text-2xl text-white">Inside the COSTlY Document Intelligence Engine</h3>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {steps.map((s, idx) => {
-          const Icon = s.icon;
-          const isActive = activeStep === idx + 1;
-          return (
-            <button
-              key={idx}
-              onClick={() => setActiveStep(idx + 1)}
-              className={`rounded-xl border p-5 text-left transition relative ${
-                isActive
-                  ? "border-orange-500 bg-orange-500/10 shadow-lg shadow-orange-500/10"
-                  : "border-white/5 bg-slate-950/60 hover:border-white/20"
-              }`}
-            >
-              <div className="flex items-center justify-between mb-3">
-                <span className="font-mono text-xs font-bold text-orange-400">{s.num}</span>
-                <Icon className={`h-5 w-5 ${isActive ? "text-orange-400" : "text-slate-500"}`} />
+    <section id="platform" className="cl-section" data-sc-act="flow">
+      <div className="cl-wrap">
+        <p className="cl-kicker" data-sc-in>The platform</p>
+        <h2 className="cl-title" data-sc-in>One continuous system after upload.</h2>
+        <div className="cl-pipeline" data-sc-stagger="50" data-sc-in>
+          {steps.map(([num, title, body, chip]) => (
+            <div className="cl-pipe-step" key={num}>
+              <em>{num}</em>
+              <div>
+                <h3>{title}</h3>
+                <p>{body}</p>
               </div>
-              <h4 className="font-display font-bold text-slate-100 text-sm mb-1">{s.title}</h4>
-              <p className="text-slate-400 text-xs line-clamp-2">{s.desc}</p>
-            </button>
-          );
-        })}
-      </div>
-
-      <div className="rounded-xl border border-orange-500/30 bg-slate-950 p-6 font-mono text-xs space-y-2">
-        <div className="flex items-center justify-between text-slate-400 text-[11px] border-b border-white/10 pb-2">
-          <span>PIPELINE STAGE {steps[activeStep - 1].num} EXECUTION LOG</span>
-          <span className="text-emerald-400">STATUS: ACTIVE</span>
+              <span className="cl-pipe-chip">{chip}</span>
+            </div>
+          ))}
         </div>
-        <p className="text-orange-300 font-bold">{steps[activeStep - 1].output}</p>
-        <p className="text-slate-400">{steps[activeStep - 1].desc}</p>
       </div>
-    </div>
+    </section>
   );
 }
 
-/* -----------------------------------------------------------------------
-   Storytelling Component for Section 6: Feature Explorer & Live Tour
-   ----------------------------------------------------------------------- */
-function StorytellingFeatureExplorer() {
-  const [filter, setFilter] = useState<"all" | "engine" | "api" | "vault">("all");
-
-  const features = [
-    {
-      cat: "engine",
-      title: "Automatic File Classification",
-      desc: "Identifies document formats automatically and categorizes content structure without manual tags.",
-      badge: "INTAKE ENGINE",
-      icon: ScanSearch,
-    },
-    {
-      cat: "engine",
-      title: "Precise Pricing Engine",
-      desc: "Handles complex pricing scenarios: duplex discounting, B&W vs color pages, volume copies, and custom rates.",
-      badge: "CALCULATOR",
-      icon: Calculator,
-    },
-    {
-      cat: "api",
-      title: "Developer REST API",
-      desc: "Clean RESTful JSON API endpoints with bearer token auth, webhooks, and client SDK compatibility.",
-      badge: "REST API",
-      icon: Terminal,
-    },
-    {
-      cat: "vault",
-      title: "Secure File Sharing",
-      desc: "Generate links with view/edit permissions, expiry timers, password protection, and access tracking.",
-      badge: "SECURITY",
-      icon: ShieldCheck,
-    },
-    {
-      cat: "vault",
-      title: "Community Exchange",
-      desc: "Request hard-to-find documents, offer study materials, and track fulfilled document exchanges.",
-      badge: "COMMUNITY",
-      icon: Users,
-    },
-    {
-      cat: "engine",
-      title: "Estimate History & Logs",
-      desc: "Keep a permanent log of all your previous print estimates, document analysis, and shared links.",
-      badge: "AUDIT LOGS",
-      icon: Layers,
-    },
-  ];
-
-  const filtered = filter === "all" ? features : features.filter((f) => f.cat === filter);
-
-  return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-center gap-2 flex-wrap font-mono text-xs">
-        {(["all", "engine", "api", "vault"] as const).map((cat) => (
-          <button
-            key={cat}
-            onClick={() => setFilter(cat)}
-            className={`px-4 py-2 rounded-lg border uppercase tracking-wider transition ${
-              filter === cat
-                ? "border-orange-500 bg-orange-500/20 text-orange-300 font-bold"
-                : "border-white/10 bg-slate-900/60 text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            {cat === "all" ? "All Platform Features" : cat}
-          </button>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {filtered.map((f, idx) => {
-          const Icon = f.icon;
-          return (
-            <div
-              key={idx}
-              className="rounded-2xl border border-white/10 bg-slate-900/80 p-6 space-y-4 hover:border-orange-500/50 transition group"
-            >
-              <div className="flex items-center justify-between">
-                <div className="p-3 rounded-xl bg-orange-500/10 border border-orange-500/30 text-orange-400">
-                  <Icon className="h-6 w-6" />
-                </div>
-                <span className="font-mono text-[10px] text-orange-400 bg-orange-500/10 px-2 py-0.5 rounded border border-orange-500/20">
-                  {f.badge}
-                </span>
-              </div>
-              <h4 className="font-display font-bold text-xl text-white">{f.title}</h4>
-              <p className="text-slate-400 text-xs leading-relaxed">{f.desc}</p>
-            </div>
-          );
-        })}
-      </div>
-    </div>
+function PrintCostPeak() {
+  const result = useMemo(
+    () => calculateEstimate({ pageCount: 100, copies: 2, colorMode: "bw", sidedness: "duplex" }),
+    []
   );
-}
-
-/* -----------------------------------------------------------------------
-   Interactive Print Cost Calculator & REST API Code Viewer
-   ----------------------------------------------------------------------- */
-function InteractivePrintApiShowcase() {
-  const [pages, setPages] = useState(120);
-  const [copies, setCopies] = useState(3);
-  const [colorMode, setColorMode] = useState<"bw" | "color">("bw");
-  const [sidedness, setSidedness] = useState<"duplex" | "simplex">("duplex");
-  const [activeTab, setActiveTab] = useState<"curl" | "json" | "python">("json");
-  const [copied, setCopied] = useState(false);
-
-  const sides = sidedness === "duplex" ? pages * 2 : pages;
-  const ratePaise = colorMode === "color" ? 800 : 250;
-  const totalPaise = sides * copies * ratePaise;
-  const formattedCost = formatPaise(totalPaise);
-
-  const jsonSnippet = `{
-  "request": {
-    "document": "analysis_report.pdf",
-    "pageCount": ${pages},
-    "copies": ${copies},
-    "colorMode": "${colorMode}",
-    "sidedness": "${sidedness}"
-  },
-  "estimate": {
-    "totalSides": ${sides * copies},
-    "ratePerSidePaise": ${ratePaise},
-    "currency": "INR",
-    "totalCostFormatted": "${formattedCost}"
-  },
-  "status": 200
-}`;
-
-  const curlSnippet = `curl -X POST https://api.costly.app/v1/estimates/calculate \\
-  -H "Authorization: Bearer sec_live_key_9948" \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "pages": ${pages},
-    "copies": ${copies},
-    "colorMode": "${colorMode}",
-    "sidedness": "${sidedness}"
-  }'`;
-
-  const pythonSnippet = `import requests
-
-res = requests.post(
-    "https://api.costly.app/v1/estimates/calculate",
-    headers={"Authorization": "Bearer sec_live_key_9948"},
-    json={
-        "pages": ${pages},
-        "copies": ${copies},
-        "colorMode": "${colorMode}",
-        "sidedness": "${sidedness}"
-    }
-)
-print(res.json()["estimate"]["totalCostFormatted"]) # -> ${formattedCost}`;
-
-  const getActiveCode = () => {
-    if (activeTab === "curl") return curlSnippet;
-    if (activeTab === "python") return pythonSnippet;
-    return jsonSnippet;
-  };
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(getActiveCode());
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
-      <div className="rounded-2xl border border-white/10 bg-slate-900/90 backdrop-blur-xl p-8 flex flex-col justify-between shadow-2xl">
-        <div>
-          <div className="flex items-center gap-2 mb-6">
-            <Sliders className="h-5 w-5 text-orange-400" />
-            <h3 className="font-display font-bold text-xl text-slate-100">Live Print Cost Engine</h3>
+    <section id="cost-engine" className="cl-pinned" data-sc-act="pin" data-sc-span="2.7" data-sc-dwell="0.24">
+      <div className="sc-stage cl-print-peak">
+        <div className="cl-print-grid">
+          <div className="cl-stage-copy">
+            <p className="cl-kicker" data-sc-cue="0.04 0.22">Print cost transformation</p>
+            <h2 data-sc-cue="0.08 0.5">The calculation becomes visible.</h2>
+            <p data-sc-cue="0.28 0.78">
+              100 pages. 2 copies. B&amp;W. Duplex. The price is based on printed sides, not a hidden duplex discount.
+              Duplex changes the sheet count by placing two document pages on two sides of one sheet.
+            </p>
+            <p data-sc-cue="0.58 0.96">
+              Current rates: B&amp;W ₹2.50 per printed side. Color ₹8.00 per printed side.
+            </p>
           </div>
-
-          <div className="space-y-6">
-            <div>
-              <div className="flex justify-between text-xs font-mono mb-2">
-                <span className="text-slate-400 uppercase tracking-wide">Document Pages</span>
-                <span className="text-orange-400 font-bold">{pages} pages</span>
-              </div>
-              <input
-                type="range"
-                min="1"
-                max="500"
-                value={pages}
-                onChange={(e) => setPages(Number(e.target.value))}
-                className="w-full accent-orange-500 cursor-pointer"
-              />
-            </div>
-
-            <div>
-              <div className="flex justify-between text-xs font-mono mb-2">
-                <span className="text-slate-400 uppercase tracking-wide">Number of Copies</span>
-                <span className="text-orange-400 font-bold">{copies} copies</span>
-              </div>
-              <input
-                type="range"
-                min="1"
-                max="50"
-                value={copies}
-                onChange={(e) => setCopies(Number(e.target.value))}
-                className="w-full accent-orange-500 cursor-pointer"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-[10px] font-mono uppercase tracking-wider text-slate-400 block mb-2">
-                  Color Mode
-                </label>
-                <div className="grid grid-cols-2 gap-1 rounded-lg border border-white/10 bg-slate-950/80 p-1">
-                  <button
-                    onClick={() => setColorMode("bw")}
-                    className={`rounded py-1.5 text-xs font-mono transition ${
-                      colorMode === "bw" ? "bg-orange-500 text-white font-bold" : "text-slate-400 hover:text-slate-200"
-                    }`}
-                  >
-                    B&amp;W
-                  </button>
-                  <button
-                    onClick={() => setColorMode("color")}
-                    className={`rounded py-1.5 text-xs font-mono transition ${
-                      colorMode === "color" ? "bg-orange-500 text-white font-bold" : "text-slate-400 hover:text-slate-200"
-                    }`}
-                  >
-                    Color
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <label className="text-[10px] font-mono uppercase tracking-wider text-slate-400 block mb-2">
-                  Sidedness
-                </label>
-                <div className="grid grid-cols-2 gap-1 rounded-lg border border-white/10 bg-slate-950/80 p-1">
-                  <button
-                    onClick={() => setSidedness("duplex")}
-                    className={`rounded py-1.5 text-xs font-mono transition ${
-                      sidedness === "duplex" ? "bg-orange-500 text-white font-bold" : "text-slate-400 hover:text-slate-200"
-                    }`}
-                  >
-                    Duplex
-                  </button>
-                  <button
-                    onClick={() => setSidedness("simplex")}
-                    className={`rounded py-1.5 text-xs font-mono transition ${
-                      sidedness === "simplex" ? "bg-orange-500 text-white font-bold" : "text-slate-400 hover:text-slate-200"
-                    }`}
-                  >
-                    Simplex
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-8 rounded-xl border border-orange-500/30 bg-orange-500/10 p-6 flex items-center justify-between">
           <div>
-            <span className="text-[10px] font-mono uppercase tracking-wider text-orange-300 block">
-              Calculated Total Cost
-            </span>
-            <span className="text-3xl font-display font-extrabold text-orange-400">{formattedCost}</span>
-          </div>
-          <div className="text-right text-[11px] font-mono text-slate-400">
-            <div>{sides * copies} total sides</div>
-            <div>₹{colorMode === "color" ? "8.00" : "2.50"} per side</div>
-          </div>
-        </div>
-      </div>
-
-      <div className="rounded-2xl border border-white/10 bg-slate-950 backdrop-blur-xl p-6 flex flex-col justify-between shadow-2xl font-mono">
-        <div>
-          <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-4">
-            <div className="flex items-center gap-2">
-              <Terminal className="h-4 w-4 text-orange-400" />
-              <span className="text-xs uppercase tracking-wide text-slate-300">REST API Playground</span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              {(["json", "curl", "python"] as const).map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`px-2.5 py-1 text-[10px] uppercase rounded border transition ${
-                    activeTab === tab
-                      ? "border-orange-500/50 bg-orange-500/20 text-orange-300"
-                      : "border-transparent text-slate-500 hover:text-slate-300"
-                  }`}
-                >
-                  {tab}
-                </button>
+            <div className="cl-sheet-visual" aria-hidden="true">
+              {[
+                { head: ["NOTES", "1 / 7"], lines: ["full", "full", "short", "full", "tiny", "full", "short"] },
+                { head: ["CHAPTER 1", "2 / 7"], lines: ["full", "accent", "short", "block", "full", "tiny", "short"] },
+                { head: ["FIG. 2.1", "3 / 7"], lines: ["block", "full", "short", "full", "tiny", "full", "short"] },
+                { head: ["EQUATIONS", "4 / 7"], lines: ["full", "accent", "full", "block", "short", "full", "tiny"] },
+                { head: ["DIAGRAM", "5 / 7"], lines: ["block", "block", "full", "short", "full", "tiny", "short"] },
+                { head: ["REFS", "6 / 7"], lines: ["full", "short", "full", "short", "full", "short", "tiny"] },
+                { head: ["END", "7 / 7"], lines: ["full", "short", "tiny", "full", "block", "short", "accent"] },
+              ].map((sheet, i) => (
+                <span key={i} style={{ "--i": i } as React.CSSProperties}>
+                  <div className="cl-sheet-head">
+                    <span>{sheet.head[0]}</span>
+                    <b>{sheet.head[1]}</b>
+                  </div>
+                  {sheet.lines.map((kind, k) => {
+                    if (kind === "block") return <div key={k} className="cl-sheet-block" />;
+                    return <div key={k} className={`cl-sheet-line ${kind === "short" || kind === "tiny" || kind === "accent" ? kind : ""}`} />;
+                  })}
+                  <div className="cl-sheet-foot">
+                    <span>costly · print preview</span>
+                    <span>{sheet.head[1]}</span>
+                  </div>
+                </span>
               ))}
-              <button
-                onClick={handleCopy}
-                className="ml-2 p-1.5 text-slate-400 hover:text-orange-400 transition"
-                title="Copy code"
-              >
-                {copied ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
-              </button>
+            </div>
+            <div className="cl-equation" data-sc-cue="0.12 0.96">
+              <div className="cl-eq-box">
+                <small>Document pages</small>
+                <strong>{result.pageCount}</strong>
+              </div>
+              <div className="cl-eq-box">
+                <small>Printed sides</small>
+                <strong>{result.totalPrintedSides}</strong>
+              </div>
+              <div className="cl-eq-box">
+                <small>Physical sheets</small>
+                <strong>{result.totalPhysicalSheets}</strong>
+              </div>
+              <div className="cl-eq-box cl-total">
+                <small>Estimated cost</small>
+                <strong>{formatPaise(result.totalPaise)}</strong>
+              </div>
             </div>
           </div>
-
-          <pre className="text-xs text-slate-300 bg-slate-900/60 p-4 rounded-xl border border-white/5 overflow-x-auto leading-relaxed">
-            <code>{getActiveCode()}</code>
-          </pre>
-        </div>
-
-        <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-500">
-          <span>Endpoint: POST /v1/estimates/calculate</span>
-          <span className="text-emerald-400 flex items-center gap-1">
-            <CheckCircle2 className="h-3 w-3" /> 200 OK (34ms)
-          </span>
         </div>
       </div>
-    </div>
+    </section>
   );
 }
 
-/* -----------------------------------------------------------------------
-   The Refactored COSTlY Landing Page
-   ----------------------------------------------------------------------- */
+function PlatformAction() {
+  return (
+    <section id="community" className="cl-section" data-sc-act="flow">
+      <div className="cl-wrap">
+        <div className="cl-action">
+          <div>
+            <p className="cl-kicker" data-sc-in>Platform in action</p>
+            <h2 className="cl-title" data-sc-in>A file moves through the whole ecosystem.</h2>
+            <p className="cl-subtitle" data-sc-in>
+              Upload, analysis, classification, estimation, library, sharing, and community are connected around the
+              same document. The experience stays coherent because the document stays at the center.
+            </p>
+            <div className="cl-community-panel" data-sc-in>
+              <div className="cl-message">
+                <small>Request</small>
+                <p>&ldquo;I need Python notes.&rdquo;</p>
+              </div>
+              <div className="cl-message">
+                <small>Offer</small>
+                <p>&ldquo;I have them.&rdquo;</p>
+              </div>
+            </div>
+          </div>
+          <div className="cl-action-rail" aria-hidden="true" data-sc-stagger="80" data-sc-in>
+            <div className="cl-action-card card-upload">
+              <Upload color="var(--cl-accent)" />
+              <h3>Upload</h3>
+              <p>A document enters the workspace.</p>
+            </div>
+            <div className="cl-action-card card-analysis">
+              <Search color="var(--cl-blue)" />
+              <h3>Analysis</h3>
+              <p>Type, metadata, pages, and category become usable.</p>
+            </div>
+            <div className="cl-action-card card-library">
+              <FileArchive color="var(--cl-good)" />
+              <h3>Library</h3>
+              <p>The file can be organized, searched, downloaded, or deleted.</p>
+            </div>
+            <div className="cl-action-card card-share">
+              <Send color="var(--cl-violet)" />
+              <h3>Shared</h3>
+              <p>Permissions and expiration keep sharing intentional.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function FinalCTA() {
+  return (
+    <section className="cl-final" data-sc-act="flow">
+      <div className="cl-wrap">
+        <div className="cl-final-card" data-sc-tilt="3" data-sc-in>
+          <div className="cl-doc-head">
+            <div className="cl-file-name">
+              <span>Completely understood</span>
+              <b>semester_notes.pdf</b>
+            </div>
+            <LockKeyhole size={18} color="var(--cl-accent)" />
+          </div>
+          <div className="cl-doc-body">
+            <div className="cl-meta-grid">
+              <div className="cl-meta"><span className="cl-meta-label">Type</span><strong>PDF</strong></div>
+              <div className="cl-meta"><span className="cl-meta-label">Pages</span><strong>142</strong></div>
+              <div className="cl-meta"><span className="cl-meta-label">Mode</span><strong>B&amp;W</strong></div>
+              <div className="cl-meta"><span className="cl-meta-label">Sides</span><strong>142</strong></div>
+            </div>
+            <div className="cl-cost-strip">
+              <span className="cl-meta-label">Estimated cost</span>
+              <strong>₹355</strong>
+            </div>
+          </div>
+        </div>
+        <p className="cl-kicker" data-sc-in>Resolution</p>
+        <h2 data-sc-in>Know the real cost before you print.</h2>
+        <p data-sc-in>
+          Start with one document. Leave with the information, estimate, and confidence to manage it properly.
+        </p>
+        <div className="cl-hero-actions" style={{ justifyContent: "center" }} data-sc-in>
+          <Link className="cl-button cl-button--primary" to="/register">
+            Start Estimating <ArrowRight size={17} />
+          </Link>
+          <Link className="cl-button" to="/login">Sign In</Link>
+        </div>
+        <footer className="cl-footer">
+          <CostlyLogo />
+          <span>Document intelligence · Print cost estimation · File sharing · Community</span>
+          <span>B&amp;W ₹2.50/side · Color ₹8.00/side</span>
+        </footer>
+      </div>
+    </section>
+  );
+}
+
 export function Landing() {
   const rootRef = useRef<HTMLDivElement>(null);
+  usePointerVars(rootRef);
 
   useEffect(() => {
     if (!rootRef.current) return;
@@ -1019,339 +977,18 @@ export function Landing() {
 
   return (
     <>
-      <style>{TOKENS}</style>
-      <CustomRingCursor />
-
-      {/* 3D BACKGROUND #2: Persistent Full-Page Floating Cost & Currency Canvas */}
-      <Cost3DCanvas />
-
-      <div
-        ref={rootRef}
-        className="landing-root relative z-10 min-h-screen bg-[#080A10] text-slate-100 overflow-x-hidden selection:bg-orange-500 selection:text-white"
-      >
-        {/* ──── SECTION 1: HERO (3D Background #1: File 3D Canvas) ──── */}
-        <section data-sc-act="flow" className="relative pt-8 pb-20 lg:pt-12 lg:pb-32 overflow-hidden border-b border-white/10">
-          {/* 3D BACKGROUND #1: File 3D Cursor-Reactive Canvas */}
-          <File3DCanvas />
-
-          <div className="relative z-10 max-w-7xl mx-auto px-6">
-            <header className="flex items-center justify-between py-4 mb-16 border-b border-white/10">
-              <CostlyLogo size="md" />
-
-              <nav className="hidden md:flex items-center gap-8 text-xs font-mono uppercase tracking-wider text-slate-400">
-                <a href="#intelligence" className="hover:text-white transition">Intelligence</a>
-                <a href="#calculator" className="hover:text-white transition">Cost Engine</a>
-                <a href="#api" className="hover:text-white transition">REST API</a>
-                <a href="#features" className="hover:text-white transition">Features</a>
-                <a href="#community" className="hover:text-white transition">Community</a>
-              </nav>
-
-              <div className="flex items-center gap-3">
-                <Link to="/login" className="text-xs font-mono uppercase tracking-wider text-slate-300 hover:text-white px-3 py-2">
-                  Sign In
-                </Link>
-                <Link
-                  to="/register"
-                  className="inline-flex items-center gap-2 rounded-lg bg-orange-500 px-4 py-2 text-xs font-mono uppercase font-bold tracking-wider text-white shadow-lg shadow-orange-500/25 hover:bg-orange-600 transition"
-                >
-                  Get Started <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
-              </div>
-            </header>
-
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-              <div className="lg:col-span-7 space-y-6">
-                <div className="inline-flex items-center gap-2 rounded-full border border-orange-500/30 bg-orange-500/10 px-3.5 py-1 text-xs font-mono text-orange-400">
-                  <Sparkles className="h-3.5 w-3.5" />
-                  <span>COSTlY Document Intelligence &amp; Print Pricing API</span>
-                </div>
-
-                <h1 className="font-display font-extrabold text-4xl sm:text-6xl lg:text-7xl leading-[1.08] tracking-tight text-white">
-                  Know what you&apos;re printing <br />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-amber-400 to-amber-200">
-                    before you print it.
-                  </span>
-                </h1>
-
-                <p className="text-slate-400 text-base sm:text-lg max-w-2xl leading-relaxed">
-                  COSTlY reads any document (PDF, Word, Excel, PowerPoint), extracts key metadata, classifies categories, and calculates itemized print costs via REST API — before you touch the printer.
-                </p>
-
-                <div className="flex flex-wrap items-center gap-4 pt-2">
-                  <Link
-                    to="/register"
-                    className="inline-flex items-center gap-2 rounded-xl bg-orange-500 px-6 py-3.5 text-sm font-display font-bold text-white shadow-xl shadow-orange-500/30 hover:bg-orange-600 hover:scale-[1.02] active:scale-[0.98] transition"
-                  >
-                    Start Estimating Free <ArrowRight className="h-4 w-4" />
-                  </Link>
-                  <a
-                    href="#api"
-                    className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-slate-900/80 px-6 py-3.5 text-sm font-display font-medium text-slate-300 hover:border-white/30 hover:text-white transition"
-                  >
-                    Explore REST API <Code2 className="h-4 w-4 text-orange-400" />
-                  </a>
-                </div>
-
-                <div className="pt-6 border-t border-white/10 flex items-center gap-3 flex-wrap text-xs font-mono text-slate-400">
-                  <span className="text-slate-500 uppercase tracking-wide text-[10px]">Supported Formats:</span>
-                  <span className="rounded-md border border-orange-500/30 bg-orange-500/10 px-2.5 py-1 text-orange-400">PDF</span>
-                  <span className="rounded-md border border-blue-500/30 bg-blue-500/10 px-2.5 py-1 text-blue-400">DOCX</span>
-                  <span className="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-emerald-400">XLSX</span>
-                  <span className="rounded-md border border-purple-500/30 bg-purple-500/10 px-2.5 py-1 text-purple-400">PPTX</span>
-                </div>
-              </div>
-
-              <div className="lg:col-span-5">
-                <InteractiveIntakeDemo />
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ──── SECTION 2: STORYTELLING PROBLEM vs COSTlY ──── */}
-        <section className="py-20 lg:py-32 border-b border-white/10">
-          <div className="max-w-7xl mx-auto px-6 space-y-12">
-            <div className="max-w-3xl">
-              <span className="font-mono text-xs uppercase tracking-widest text-orange-400">Section 02 · Storytelling Friction Engine</span>
-              <h2 className="font-display font-extrabold text-3xl sm:text-5xl text-white mt-3 leading-tight">
-                Say goodbye to arbitrary print counters and mystery pricing.
-              </h2>
-            </div>
-
-            <StorytellingProblemComparison />
-          </div>
-        </section>
-
-        {/* ──── SECTION 3: STORYTELLING DOCUMENT PIPELINE & CLASSIFICATION ──── */}
-        <section id="intelligence" className="py-20 lg:py-32 border-b border-white/10">
-          <div className="max-w-7xl mx-auto px-6 space-y-16">
-            <div className="text-center max-w-3xl mx-auto space-y-4">
-              <span className="font-mono text-xs uppercase tracking-widest text-orange-400">Section 03 · Storytelling Pipeline</span>
-              <h2 className="font-display font-extrabold text-3xl sm:text-5xl text-white">
-                How COSTlY analyzes and classifies documents in 4 stages.
-              </h2>
-            </div>
-
-            <StorytellingPipelineInspector />
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pt-6">
-              <div className="rounded-2xl border border-orange-500/30 bg-slate-900/80 p-6 space-y-4 relative overflow-hidden group hover:border-orange-500 transition">
-                <div className="flex items-center justify-between">
-                  <div className="p-3 rounded-xl bg-orange-500/10 border border-orange-500/30 text-orange-400">
-                    <FileText className="h-6 w-6" />
-                  </div>
-                  <span className="font-mono text-xs font-bold text-orange-400">PDF</span>
-                </div>
-                <h3 className="font-display font-bold text-lg text-white">PDF Documents</h3>
-                <p className="text-slate-400 text-xs leading-relaxed">
-                  Extracts page counts, text density, embedded font vectors, and identifies scanned vs searchable content.
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-blue-500/30 bg-slate-900/80 p-6 space-y-4 relative overflow-hidden group hover:border-blue-500 transition">
-                <div className="flex items-center justify-between">
-                  <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-400">
-                    <FileCode className="h-6 w-6" />
-                  </div>
-                  <span className="font-mono text-xs font-bold text-blue-400">DOCX</span>
-                </div>
-                <h3 className="font-display font-bold text-lg text-white">Microsoft Word</h3>
-                <p className="text-slate-400 text-xs leading-relaxed">
-                  Parses document sections, estimates printed physical pages, counts inline images, and extracts heading trees.
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-emerald-500/30 bg-slate-900/80 p-6 space-y-4 relative overflow-hidden group hover:border-emerald-500 transition">
-                <div className="flex items-center justify-between">
-                  <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
-                    <FileSpreadsheet className="h-6 w-6" />
-                  </div>
-                  <span className="font-mono text-xs font-bold text-emerald-400">XLSX</span>
-                </div>
-                <h3 className="font-display font-bold text-lg text-white">Microsoft Excel</h3>
-                <p className="text-slate-400 text-xs leading-relaxed">
-                  Detects active worksheets, calculates printable grid boundaries, and separates B&amp;W tables from color charts.
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-purple-500/30 bg-slate-900/80 p-6 space-y-4 relative overflow-hidden group hover:border-purple-500 transition">
-                <div className="flex items-center justify-between">
-                  <div className="p-3 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-400">
-                    <Presentation className="h-6 w-6" />
-                  </div>
-                  <span className="font-mono text-xs font-bold text-purple-400">PPTX</span>
-                </div>
-                <h3 className="font-display font-bold text-lg text-white">PowerPoint Decks</h3>
-                <p className="text-slate-400 text-xs leading-relaxed">
-                  Evaluates total slide deck count, slide aspect ratio (16:9 vs 4:3), and calculates color vs B&amp;W slide ratio.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ──── SECTION 4: LIVE COST CALCULATOR & REST API ──── */}
-        <section id="calculator" className="py-20 lg:py-32 border-b border-white/10">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
-              <span className="font-mono text-xs uppercase tracking-widest text-orange-400">Print Engine &amp; Developer API</span>
-              <h2 className="font-display font-extrabold text-3xl sm:text-5xl text-white">
-                Test the COSTlY Calculation REST API
-              </h2>
-            </div>
-
-            <div id="api">
-              <InteractivePrintApiShowcase />
-            </div>
-          </div>
-        </section>
-
-        {/* ──── SECTION 5: 4-STEP WORKFLOW ──── */}
-        <section className="py-20 lg:py-32 border-b border-white/10">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
-              <span className="font-mono text-xs uppercase tracking-widest text-orange-400">How COSTlY Works</span>
-              <h2 className="font-display font-extrabold text-3xl sm:text-5xl text-white">
-                One document. Four automated steps.
-              </h2>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="rounded-2xl border border-white/10 bg-slate-900/80 p-6 space-y-3">
-                <span className="font-mono text-xs font-bold text-orange-400 uppercase tracking-wider">Step 01</span>
-                <h3 className="font-display font-bold text-xl text-white">Upload Document</h3>
-                <p className="text-slate-400 text-xs leading-relaxed">
-                  Drag and drop PDF, Word, Excel, or PowerPoint files directly into the web application or upload via REST API.
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-white/10 bg-slate-900/80 p-6 space-y-3">
-                <span className="font-mono text-xs font-bold text-orange-400 uppercase tracking-wider">Step 02</span>
-                <h3 className="font-display font-bold text-xl text-white">Extract &amp; Classify</h3>
-                <p className="text-slate-400 text-xs leading-relaxed">
-                  COSTlY reads metadata, identifies MIME type, parses page counts, and classifies the document into categories.
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-white/10 bg-slate-900/80 p-6 space-y-3">
-                <span className="font-mono text-xs font-bold text-orange-400 uppercase tracking-wider">Step 03</span>
-                <h3 className="font-display font-bold text-xl text-white">Calculate Price</h3>
-                <p className="text-slate-400 text-xs leading-relaxed">
-                  The calculation engine applies current rates (B&amp;W ₹2.50/side, Color ₹8.00/side, Duplex/Simplex) for total cost.
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-white/10 bg-slate-900/80 p-6 space-y-3">
-                <span className="font-mono text-xs font-bold text-orange-400 uppercase tracking-wider">Step 04</span>
-                <h3 className="font-display font-bold text-xl text-white">Share &amp; Print</h3>
-                <p className="text-slate-400 text-xs leading-relaxed">
-                  Generate secure share links with expiry dates, or send the estimate directly to your library or print queue.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ──── SECTION 6: STORYTELLING FEATURE EXPLORER ──── */}
-        <section id="features" className="py-20 lg:py-32 border-b border-white/10">
-          <div className="max-w-7xl mx-auto px-6 space-y-12">
-            <div className="text-center max-w-3xl mx-auto space-y-4">
-              <span className="font-mono text-xs uppercase tracking-widest text-orange-400">Section 06 · Storytelling Feature Explorer</span>
-              <h2 className="font-display font-extrabold text-3xl sm:text-5xl text-white">
-                Everything you need for document intelligence.
-              </h2>
-            </div>
-
-            <StorytellingFeatureExplorer />
-          </div>
-        </section>
-
-        {/* ──── SECTION 7: COMMUNITY EXCHANGE ──── */}
-        <section id="community" className="py-20 lg:py-32 border-b border-white/10">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-              <div className="space-y-6">
-                <span className="font-mono text-xs uppercase tracking-widest text-orange-400">Community Module</span>
-                <h2 className="font-display font-extrabold text-3xl sm:text-5xl text-white leading-tight">
-                  Someone has the document. <br />
-                  <span className="text-orange-400">Ask for it here.</span>
-                </h2>
-                <p className="text-slate-400 text-base leading-relaxed">
-                  Post what you&apos;re looking for, tag by subject, and offer files you hold. When a user fulfills your request, the request closes and the document is shared instantly.
-                </p>
-
-                <div className="grid grid-cols-3 gap-4 pt-4 border-t border-white/10">
-                  <div>
-                    <span className="font-display font-extrabold text-2xl text-white block">Open</span>
-                    <span className="font-mono text-xs text-slate-500">Public requests</span>
-                  </div>
-                  <div>
-                    <span className="font-display font-extrabold text-2xl text-white block">Fulfilled</span>
-                    <span className="font-mono text-xs text-slate-500">Shared files</span>
-                  </div>
-                  <div>
-                    <span className="font-display font-extrabold text-2xl text-white block">Free</span>
-                    <span className="font-mono text-xs text-slate-500">To ask &amp; offer</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-white/10 bg-slate-900/90 p-6 space-y-4 shadow-2xl">
-                <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                  <span className="font-mono text-xs uppercase text-slate-400">Live Community Requests</span>
-                  <span className="text-xs font-mono text-orange-400">4 Active</span>
-                </div>
-
-                <div className="space-y-3 font-mono text-xs">
-                  <div className="rounded-xl border border-white/5 bg-slate-950/60 p-4 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-slate-200 font-bold">CS301_Data_Structures_Exam_2025.pdf</span>
-                      <span className="rounded bg-emerald-500/10 text-emerald-400 px-2 py-0.5 text-[10px]">FULFILLED</span>
-                    </div>
-                    <p className="text-slate-400 text-[11px]">Requested by @alex_m · 142 pages · B&amp;W</p>
-                  </div>
-
-                  <div className="rounded-xl border border-white/5 bg-slate-950/60 p-4 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-slate-200 font-bold">Organic_Chemistry_Lab_Manual.docx</span>
-                      <span className="rounded bg-orange-500/10 text-orange-400 px-2 py-0.5 text-[10px]">OPEN</span>
-                    </div>
-                    <p className="text-slate-400 text-[11px]">Requested by @sarah_k · 58 pages · Color</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ──── SECTION 8: CALL TO ACTION & FOOTER ──── */}
-        <section className="py-24 relative overflow-hidden bg-gradient-to-b from-slate-950 to-black">
-          <div className="max-w-4xl mx-auto px-6 text-center space-y-8 relative z-10">
-            <h2 className="font-display font-extrabold text-4xl sm:text-6xl text-white tracking-tight">
-              Your document library &amp; print cost API starts here.
-            </h2>
-            <p className="text-slate-400 text-base sm:text-lg max-w-xl mx-auto">
-              Free to register. No credit card required. Classify files, calculate costs, and share link previews in seconds.
-            </p>
-            <div className="flex items-center justify-center gap-4">
-              <Link
-                to="/register"
-                className="inline-flex items-center gap-2 rounded-xl bg-orange-500 px-8 py-4 text-base font-display font-bold text-white shadow-xl shadow-orange-500/30 hover:bg-orange-600 hover:scale-[1.02] active:scale-[0.98] transition"
-              >
-                Create Free Account <ArrowRight className="h-5 w-5" />
-              </Link>
-            </div>
-          </div>
-
-          <footer className="mt-24 border-t border-white/10 pt-12 pb-8 max-w-7xl mx-auto px-6">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-slate-500">
-              <CostlyLogo size="sm" />
-              <p>Document Intelligence · Print Cost Estimation REST API</p>
-              <p>Rates: B&amp;W ₹2.50/side · Color ₹8.00/side</p>
-            </div>
-          </footer>
-        </section>
-      </div>
+      <style>{styles}</style>
+      <main ref={rootRef} className="costly-landing">
+        <div className="cl-noise" aria-hidden="true" />
+        <Navigation />
+        <Hero />
+        <ProblemStory />
+        <WhatCostlyDoes />
+        <PlatformPipeline />
+        <PrintCostPeak />
+        <PlatformAction />
+        <FinalCTA />
+      </main>
     </>
   );
 }

@@ -32,7 +32,7 @@ export function Intelligence() {
     <div>
       <PageHeader
         title="Document Intelligence"
-        description="Drop in a file and COSTlY identifies its type, extracts metadata, and classifies it."
+        description="Drop in a file and COSTTY identifies its type, extracts metadata, and classifies it."
       />
 
       {stage === "idle" && <UploadDropzone onFiles={handleFiles} />}

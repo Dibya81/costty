@@ -1,4 +1,3 @@
-import { HardDrive } from "lucide-react";
 import { Stat } from "../../components/ui/Stat";
 import { CategoryBars } from "../../components/admin/CategoryBars";
 import { useAsync } from "../../hooks/useAsync";

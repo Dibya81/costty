@@ -11,6 +11,7 @@ import {
   X,
   User,
   LogOut,
+  Receipt,
 } from "lucide-react";
 import { cn } from "../utils/cn";
 import { useAuth } from "../lib/AuthContext";
@@ -21,6 +22,7 @@ const NAV_ITEMS = [
   { to: "/app/documents",   label: "Documents",              icon: FolderOpen },
   { to: "/app/intelligence",label: "Document Intelligence",  icon: ScanSearch },
   { to: "/app/estimator",   label: "Print Estimator",        icon: Calculator },
+  { to: "/app/prices",      label: "Prices",                 icon: Receipt },
   { to: "/app/shared",      label: "Shared Files",           icon: Share2 },
   { to: "/app/community",   label: "Community",              icon: Users },
   { to: "/app/profile",     label: "Settings",               icon: User },

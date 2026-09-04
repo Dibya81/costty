@@ -15,7 +15,7 @@ export function calculateEstimate(opts: {
   const COLOR_RATE = 8.0;
   const rate = opts.colorMode === "bw" ? BW_RATE : COLOR_RATE;
   const ratePerSidePaise = Math.round(rate * 100);
-  const printedSides = opts.sidedness === "duplex" ? opts.pageCount * 2 : opts.pageCount;
+  const printedSides = opts.pageCount;
   const costPerCopyPaise = printedSides * ratePerSidePaise;
   const totalPaise = costPerCopyPaise * opts.copies;
   const physicalSheets =
@@ -26,7 +26,9 @@ export function calculateEstimate(opts: {
     colorMode: opts.colorMode,
     sidedness: opts.sidedness,
     printedSides,
+    totalPrintedSides: printedSides * opts.copies,
     physicalSheets,
+    totalPhysicalSheets: physicalSheets * opts.copies,
     ratePerSidePaise,
     costPerCopyPaise,
     totalPaise,

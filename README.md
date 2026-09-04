@@ -1,6 +1,8 @@
-# Document Platform
+# COSTTY
 
 A full-stack document management platform with print cost estimation, file sharing, and community features.
+
+![COSTTY landing page](docs/architecture-diagram.png)
 
 ## Tech Stack
 
@@ -49,12 +51,14 @@ file_2/
 
 ## Features
 
-- **Print Cost Estimator** — Calculate print costs with configurable pricing rates
-- **Document Library** — Upload, organize, search, and manage files in folders
+- **Print Cost Estimator** — REST API that calculates estimated cost of a print request based on **page count, copies, color/B&W, and simplex/duplex** printing. The default rate is **₹2.50/side B&W** and **₹8.00/side color**. Auto-calculates a price for every uploaded document.
+- **Document Library** — Upload, organize, search, and manage files in folders (PDF, DOC/DOCX, XLS/XLSX, PPT/PPTX, TXT, CSV, common image formats)
 - **File Sharing** — Generate shareable links with optional passwords and expiry
 - **Community Board** — Document requests and offers between users
 - **Admin Dashboard** — User management, analytics, revenue, and content moderation
 - **Auth & RBAC** — JWT-based authentication with admin/user role separation
+- **Dark mode** — Full light/dark theme support across the app
+- **Mobile responsive** — Adaptive layouts for phone, tablet, and desktop
 
 ## Quick Start (Local Development with Supabase)
 
