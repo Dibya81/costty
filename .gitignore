@@ -34,6 +34,11 @@ frontend/lab/
 *.sln
 *.sw?
 
+# Tooling
+.claude/
+.github/
+package-lock.json
+
 # Build outputs
 build/
 *.tsbuildinfo
