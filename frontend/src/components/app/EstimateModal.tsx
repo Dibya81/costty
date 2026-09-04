@@ -17,7 +17,7 @@ interface Props {
   onSaved: (estimate: EstimateResponse) => void;
 }
 
-export function EstimateModal({ open, onClose, fileId, fileName, initialPageCount, onSaved }: Props) {
+export function EstimateModal({ open, onClose, fileName, initialPageCount, onSaved }: Props) {
   const { push } = useToast();
   const [pageCount, setPageCount] = useState<number>(Math.max(1, initialPageCount));
   const [copies, setCopies] = useState<number>(1);

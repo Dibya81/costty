@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Stat } from "../../components/ui/Stat";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { useAsync } from "../../hooks/useAsync";
@@ -7,7 +6,6 @@ import { MessagesSquare, Flag } from "lucide-react";
 
 export function AdminCommunity() {
   const { data: stats } = useAsync(getCommunityStats, []);
-  const [moderated, setModerated] = useState<number[]>([]);
 
   return (
     <div className="space-y-8">
