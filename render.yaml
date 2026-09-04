@@ -1,0 +1,42 @@
+services:
+  - type: web
+    name: costty-api
+    runtime: python
+    rootDir: backend
+    plan: starter
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    startCommand: alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: APP_NAME
+        value: COSTTY API
+      - key: APP_ENV
+        value: production
+      - key: DEBUG
+        value: false
+      - key: DATABASE_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_STORAGE_BUCKET
+        value: documents
+      - key: STORAGE_BACKEND
+        value: supabase
+      - key: CORS_ORIGINS
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CURRENCY
+        value: INR
+      - key: BW_SIMPLEX_PRICE
+        value: "2.50"
+      - key: BW_DUPLEX_PRICE
+        value: "2.50"
+      - key: COLOR_SIMPLEX_PRICE
+        value: "8.00"
+      - key: COLOR_DUPLEX_PRICE
+        value: "8.00"

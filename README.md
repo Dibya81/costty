@@ -174,18 +174,58 @@ npm run build
 ## Deployment
 
 ### Frontend → Vercel
-1. Push to GitHub
-2. Import the repo in Vercel
-3. Set root directory: `frontend`
-4. Add env vars: `VITE_API_URL`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
-5. Deploy
+1. Go to [vercel.com/new](https://vercel.com/new) and import this repo
+2. Set **Root Directory** to `frontend`
+3. Framework: Vite (auto-detected)
+4. Add these **Environment Variables**:
+   - `VITE_API_URL` = `https://costty-api.onrender.com` (your Render URL)
+   - `VITE_SUPABASE_URL` = your Supabase project URL
+   - `VITE_SUPABASE_ANON_KEY` = your Supabase anon key
+   - `VITE_SUPABASE_STORAGE_BUCKET` = `documents`
+5. Click **Deploy**
 
-### Backend → Render / Railway / Fly.io
-1. Push to GitHub
-2. Create a new Web Service from the `backend/` directory
-3. Build command: `pip install -r requirements.txt`
-4. Start command: `alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-5. Add env vars (DATABASE_URL, SUPABASE_*, JWT_SECRET, CORS_ORIGINS)
+### Backend → Render
+The repo includes a `render.yaml` for one-click deploy.
+
+**Option A — Blueprint (easiest):**
+1. Go to [render.com/blueprints](https://dashboard.render.com/blueprints)
+2. Connect this repo
+3. Render reads `render.yaml` and provisions `costty-api` automatically
+4. Add the missing secrets in the dashboard:
+   - `DATABASE_URL` (Supabase pooler URL)
+   - `SUPABASE_URL`
+   - `SUPABASE_ANON_KEY`
+   - `SUPABASE_SERVICE_ROLE_KEY`
+   - `CORS_ORIGINS` (your Vercel URL, e.g. `https://costty.vercel.app`)
+
+**Option B — Manual Web Service:**
+1. Go to [render.com/new/web-service](https://dashboard.render.com/new/web-service)
+2. Connect this repo
+3. Set:
+   - **Root Directory:** `backend`
+   - **Runtime:** Python
+   - **Build Command:** `pip install --upgrade pip && pip install -r requirements.txt`
+   - **Start Command:** `alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+   - **Health Check Path:** `/api/v1/health`
+4. Add the same environment variables as above
+5. Click **Create Web Service**
+
+### Supabase Setup (one-time)
+1. Create a project at [supabase.com](https://supabase.com)
+2. **SQL Editor** → run `backend/supabase/migrations/001_initial_schema.sql`
+3. **Storage** → create a private bucket named `documents`
+4. **Settings > API** → copy:
+   - Project URL → `SUPABASE_URL`
+   - anon public key → `SUPABASE_ANON_KEY`
+   - service_role secret → `SUPABASE_SERVICE_ROLE_KEY`
+5. **Settings > Database > Connection string > URI** → copy the **Transaction pooler** URL → `DATABASE_URL`
+
+### Deployment Order
+1. Set up Supabase first
+2. Deploy backend to Render → wait for "Live"
+3. Copy the Render URL (e.g. `https://costty-api.onrender.com`)
+4. Deploy frontend to Vercel with `VITE_API_URL` pointing to the Render URL
+5. After frontend is live, update `CORS_ORIGINS` in Render to include the Vercel URL
 
 ## License
 
