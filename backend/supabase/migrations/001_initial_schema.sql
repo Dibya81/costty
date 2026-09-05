@@ -1,6 +1,9 @@
 -- ============================================================================
--- Document Platform - Supabase Initial Schema
--- Paste this entire file into: Supabase Dashboard > SQL Editor > New Query > Run
+-- COSTTY — Supabase Initial Schema
+-- Project: bbxezevjnlubszdlkyuo
+-- Paste this entire file into:
+--   Supabase Dashboard > SQL Editor > New Query > Run
+-- This script is idempotent — safe to run multiple times.
 -- ============================================================================
 
 -- ============================================================================
@@ -13,6 +16,8 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- ============================================================================
 
 -- USERS -------------------------------------------------------------------
+-- Backend-issued integer user IDs. Authentication is JWT-based via FastAPI,
+-- not Supabase Auth, so we do NOT use auth.users here.
 CREATE TABLE IF NOT EXISTS public.users (
     id SERIAL PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
@@ -26,6 +31,8 @@ CREATE TABLE IF NOT EXISTS public.users (
 CREATE INDEX IF NOT EXISTS ix_users_email ON public.users(email);
 
 -- FOLDERS ------------------------------------------------------------------
+-- owner_id is a string (we store the user's email there) so that auth and
+-- ownership stay decoupled from the SERIAL primary key.
 CREATE TABLE IF NOT EXISTS public.folders (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -101,15 +108,16 @@ CREATE TABLE IF NOT EXISTS public.pricing_rates (
 );
 CREATE INDEX IF NOT EXISTS ix_pricing_rates_key ON public.pricing_rates(key);
 
--- Seed default pricing rates
+-- Seed default pricing rates (only if not already present)
 INSERT INTO public.pricing_rates (key, color_mode, print_type, price_per_printed_side) VALUES
-    ('bw_simplex',   'bw',    'simplex', 2.50),
-    ('bw_duplex',    'bw',    'duplex',  2.50),
-    ('color_simplex','color', 'simplex', 8.00),
-    ('color_duplex', 'color', 'duplex',  8.00)
+    ('bw_simplex',    'bw',    'simplex', 2.50),
+    ('bw_duplex',     'bw',    'duplex',  2.50),
+    ('color_simplex', 'color', 'simplex', 8.00),
+    ('color_duplex',  'color', 'duplex',  8.00)
 ON CONFLICT (key) DO NOTHING;
 
 -- COMMUNITY REQUESTS -------------------------------------------------------
+-- author_id REFERENCES users(id) (integer) since this is an internal user.
 CREATE TABLE IF NOT EXISTS public.community_requests (
     id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
@@ -146,10 +154,11 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP TRIGGER IF EXISTS trg_users_updated_at          ON public.users;
-DROP TRIGGER IF EXISTS trg_folders_updated_at        ON public.folders;
-DROP TRIGGER IF EXISTS trg_files_updated_at          ON public.files;
-DROP TRIGGER IF EXISTS trg_pricing_rates_updated_at  ON public.pricing_rates;
+-- Drop existing triggers first so the script is fully re-runnable
+DROP TRIGGER IF EXISTS trg_users_updated_at              ON public.users;
+DROP TRIGGER IF EXISTS trg_folders_updated_at            ON public.folders;
+DROP TRIGGER IF EXISTS trg_files_updated_at              ON public.files;
+DROP TRIGGER IF EXISTS trg_pricing_rates_updated_at      ON public.pricing_rates;
 DROP TRIGGER IF EXISTS trg_community_requests_updated_at ON public.community_requests;
 
 CREATE TRIGGER trg_users_updated_at
@@ -175,34 +184,34 @@ CREATE TRIGGER trg_community_requests_updated_at
 -- ============================================================================
 -- 4. STORAGE BUCKET
 -- ============================================================================
+-- The 'documents' bucket is PRIVATE — only the backend (via service_role)
+-- can read/write. The backend will issue short-lived signed URLs when a user
+-- requests a download.
 INSERT INTO storage.buckets (id, name, public)
 VALUES ('documents', 'documents', false)
 ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================================
--- 5. ROW LEVEL SECURITY (RLS) — disabled for service-role access
+-- 5. ROW LEVEL SECURITY (RLS) — disabled, but policies granted to service_role
 -- ============================================================================
--- The FastAPI backend uses the SUPABASE_SERVICE_ROLE_KEY which bypasses RLS.
--- We keep RLS disabled on these tables because authentication happens via JWT
--- in the FastAPI app, not via Supabase Auth. Re-enable + add policies if you
--- later migrate to Supabase Auth.
+-- The FastAPI backend authenticates users itself (JWT) and only it talks to
+-- Supabase (using SUPABASE_SERVICE_ROLE_KEY which bypasses RLS by default).
+-- We keep RLS disabled on app tables so service_role can do anything.
+-- Re-enable + write policies if you ever migrate to Supabase Auth.
 
-ALTER TABLE public.users              DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.folders            DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.files              DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.share_links        DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.print_estimates    DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.pricing_rates      DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.community_requests DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.community_offers   DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.users              DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.folders            DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.files              DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.share_links        DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.print_estimates    DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.pricing_rates      DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.community_requests DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.community_offers   DISABLE ROW LEVEL SECURITY;
 
--- ============================================================================
--- 6. STORAGE RLS POLICIES — allow service role to manage files
--- ============================================================================
--- Drop existing policies if they exist (safe re-run)
+-- Grant the service_role full access to the documents bucket.
+-- Drop existing policy first so this is re-runnable.
 DROP POLICY IF EXISTS "service_role_all_documents" ON storage.objects;
 
--- Allow backend (service role) full access to the documents bucket
 CREATE POLICY "service_role_all_documents"
     ON storage.objects
     FOR ALL
@@ -211,9 +220,16 @@ CREATE POLICY "service_role_all_documents"
     WITH CHECK (bucket_id = 'documents');
 
 -- ============================================================================
+-- 6. GRANT TABLE PRIVILEGES TO service_role (defense in depth)
+-- ============================================================================
+GRANT ALL ON ALL TABLES    IN SCHEMA public TO service_role;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO service_role;
+GRANT ALL ON ALL FUNCTIONS IN SCHEMA public TO service_role;
+
+-- ============================================================================
 -- DONE. Verify in Supabase:
---   Table Editor > should see: users, folders, files, share_links,
+--   Table Editor   > should see: users, folders, files, share_links,
 --                               print_estimates, pricing_rates,
 --                               community_requests, community_offers
---   Storage > should see bucket: documents
+--   Storage        > should see bucket: documents (private)
 -- ============================================================================
