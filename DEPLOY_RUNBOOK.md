@@ -71,7 +71,7 @@ Open: https://dashboard.render.com → your `costty` service → **Environment**
 | `SUPABASE_SERVICE_ROLE_KEY` | *(paste the `sb_secret_...` or `eyJ...` service_role key — do NOT commit this to git)* |
 | `SUPABASE_STORAGE_BUCKET` | `documents` |
 | `STORAGE_BACKEND` | `supabase` |
-| `CORS_ORIGINS` | `https://frontend-one-orcin-59.vercel.app,https://frontend-git-main-dibya-bhusals-projects.vercel.app,https://frontend-ck8anu51g-dibya-bhusals-projects.vercel.app` |
+| `CORS_ORIGINS` | `https://costty-le2r7nj5y-dibya-bhusals-projects.vercel.app,https://costty.vercel.app,http://localhost:5173,http://localhost:3000` |
 | `JWT_SECRET` | *(run `openssl rand -hex 32` in your terminal, paste output)* |
 | `JWT_ALGORITHM` | `HS256` |
 | `JWT_EXPIRE_MINUTES` | `480` |
@@ -132,7 +132,7 @@ curl https://costty.onrender.com/api/v1/health
 # → {"status":"ok"}
 
 # Try the docs page
-open https://frontend-one-orcin-59.vercel.app/app/documents
+open https://costty-le2r7nj5y-dibya-bhusals-projects.vercel.app/app/documents
 ```
 
 If you see "Failed to fetch" in the browser console after the Vercel redeploy, double-check:
