@@ -65,7 +65,7 @@ Open: https://dashboard.render.com → your `costty` service → **Environment**
 | `APP_NAME` | `COSTTY API` |
 | `APP_ENV` | `production` |
 | `DEBUG` | `false` |
-| `DATABASE_URL` | `postgresql+psycopg://postgres:<DB_PASSWORD>@db.bbxezevjnlubszdlkyuo.supabase.co:5432/postgres` |
+| `DATABASE_URL` | `postgresql+psycopg://postgres.bbxezevjnlubszdlkyuo:<DB_PASSWORD>@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres` |
 | `SUPABASE_URL` | `https://bbxezevjnlubszdlkyuo.supabase.co` |
 | `SUPABASE_ANON_KEY` | *(paste the `sb_publishable_...` or `eyJ...` anon key — do NOT commit this to git)* |
 | `SUPABASE_SERVICE_ROLE_KEY` | *(paste the `sb_secret_...` or `eyJ...` service_role key — do NOT commit this to git)* |
